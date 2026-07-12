@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Rally",
-    "slug": "rally",
+    "name": "Trusty",
+    "slug": "trusty",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -14,10 +14,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.rally.app"
+      "bundleIdentifier": "com.trusty.app"
     },
     "android": {
-      "package": "com.rally.app",
+      "package": "com.trusty.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0f172a"

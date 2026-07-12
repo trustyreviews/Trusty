@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 export default function App() {
   return (
     <View style={styles.container}>
-      <Text style={styles.brand}>Rally</Text>
+      <Text style={styles.brand}>Trusty</Text>
       <Text style={styles.subtitle}>Your new Expo app is ready.</Text>
       <StatusBar style="light" />
     </View>
