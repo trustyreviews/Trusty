@@ -1,11 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import Animated, {
-  Easing,
-  interpolate,
   useAnimatedStyle,
   useSharedValue,
-  withTiming,
 } from 'react-native-reanimated';
 import { SceneToggle } from './SceneToggle';
 
@@ -13,54 +10,36 @@ const { width: W, height: H } = Dimensions.get('window');
 const FRAME_H = Math.min(H * 0.48, Math.max(W * 0.95, 380));
 
 /**
- * Big simple restaurant graphic — auto Empty → Packed loop.
+ * Big simple restaurant graphic — one hard cut Empty → Packed, then stays.
  */
 export function RestaurantHeroScene({ scene, onChange }) {
   const morph = useSharedValue(scene === 'after' ? 1 : 0);
-  const userTouched = useRef(false);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
 
   useEffect(() => {
-    morph.value = withTiming(scene === 'after' ? 1 : 0, {
-      duration: 900,
-      easing: Easing.bezier(0.22, 1, 0.36, 1),
-    });
+    // Hard cut — no soft crossfade
+    morph.value = scene === 'after' ? 1 : 0;
   }, [scene, morph]);
 
-  // Auto-cycle Empty → Packed → Empty unless user taps the toggle
+  // Auto Empty → Packed once, then stop
   useEffect(() => {
-    let cancelled = false;
-    let timer;
-
-    const tick = (next) => {
-      if (cancelled || userTouched.current) return;
-      onChangeRef.current(next);
-      timer = setTimeout(() => tick(next === 'after' ? 'before' : 'after'), 3200);
-    };
-
-    timer = setTimeout(() => tick('after'), 1400);
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
+    const timer = setTimeout(() => {
+      onChangeRef.current('after');
+    }, 1600);
+    return () => clearTimeout(timer);
   }, []);
 
-  const handleChange = (next) => {
-    userTouched.current = true;
-    onChange(next);
-  };
-
   const emptyStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(morph.value, [0, 1], [1, 0]),
+    opacity: morph.value === 0 ? 1 : 0,
   }));
 
   const packedStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(morph.value, [0, 1], [0, 1]),
+    opacity: morph.value === 1 ? 1 : 0,
   }));
 
   const nightWash = useAnimatedStyle(() => ({
-    opacity: interpolate(morph.value, [0, 1], [0, 1]),
+    opacity: morph.value,
   }));
 
   return (
@@ -69,10 +48,8 @@ export function RestaurantHeroScene({ scene, onChange }) {
         <View style={styles.mist} />
         <Animated.View style={[styles.nightSky, nightWash]} />
 
-        {/* Sidewalk */}
         <View style={styles.sidewalk} />
 
-        {/* Building */}
         <View style={styles.building}>
           <View style={styles.awning}>
             <View style={[styles.stripe, { backgroundColor: '#c45c4a' }]} />
@@ -84,13 +61,12 @@ export function RestaurantHeroScene({ scene, onChange }) {
           </View>
 
           <View style={styles.facade}>
-            <Window emptyStyle={emptyStyle} packedStyle={packedStyle} />
-            <Window emptyStyle={emptyStyle} packedStyle={packedStyle} wide />
+            <Window emptyStyle={emptyStyle} packedStyle={packedStyle} guests />
+            <Window emptyStyle={emptyStyle} packedStyle={packedStyle} wide guests />
             <Door emptyStyle={emptyStyle} packedStyle={packedStyle} />
-            <Window emptyStyle={emptyStyle} packedStyle={packedStyle} />
+            <Window emptyStyle={emptyStyle} packedStyle={packedStyle} guests />
           </View>
 
-          {/* Simple cafe sign */}
           <View style={styles.signBoard}>
             <Text style={styles.signText}>CAFE</Text>
           </View>
@@ -100,26 +76,27 @@ export function RestaurantHeroScene({ scene, onChange }) {
           </Animated.View>
         </View>
 
-        {/* Empty patio */}
-        <Animated.View style={[styles.patio, emptyStyle]}>
-          <RoundTable x="12%" />
-          <RoundTable x="38%" />
-          <RoundTable x="64%" />
+        <Animated.View style={[styles.patio, emptyStyle]} pointerEvents="none">
+          <RoundTable x="8%" />
+          <RoundTable x="32%" />
+          <RoundTable x="56%" />
+          <RoundTable x="78%" />
         </Animated.View>
 
-        {/* Packed patio + line */}
-        <Animated.View style={[styles.patio, packedStyle]}>
+        <Animated.View style={[styles.patio, packedStyle]} pointerEvents="none">
           <View style={styles.groundGlow} />
-          <RoundTable x="12%" filled />
-          <RoundTable x="38%" filled />
-          <RoundTable x="64%" filled />
+          <RoundTable x="4%" filled seats={3} />
+          <RoundTable x="24%" filled seats={2} />
+          <RoundTable x="44%" filled seats={3} />
+          <RoundTable x="64%" filled seats={2} />
+          <RoundTable x="82%" filled seats={2} />
           <Queue />
         </Animated.View>
 
         <View style={styles.toggleOverlay}>
           <SceneToggle
             value={scene}
-            onChange={handleChange}
+            onChange={onChange}
             left="Empty"
             right="Packed"
             leftSub="quiet"
@@ -131,7 +108,7 @@ export function RestaurantHeroScene({ scene, onChange }) {
   );
 }
 
-function Window({ emptyStyle, packedStyle, wide = false }) {
+function Window({ emptyStyle, packedStyle, wide = false, guests = false }) {
   return (
     <View style={[styles.windowSlot, wide && styles.windowWide]}>
       <Animated.View style={[styles.windowFill, emptyStyle]}>
@@ -145,6 +122,12 @@ function Window({ emptyStyle, packedStyle, wide = false }) {
           <View style={[styles.mullionV, styles.mullionLit]} />
           <View style={[styles.mullionH, styles.mullionLit]} />
           <View style={styles.insideTable} />
+          {guests ? (
+            <>
+              <View style={[styles.insideGuest, { left: '18%' }]} />
+              <View style={[styles.insideGuest, { right: '18%' }]} />
+            </>
+          ) : null}
         </View>
       </Animated.View>
     </View>
@@ -161,16 +144,20 @@ function Door({ emptyStyle, packedStyle }) {
   );
 }
 
-function RoundTable({ x, filled = false }) {
+function RoundTable({ x, filled = false, seats = 2 }) {
   return (
     <View style={[styles.tableWrap, { left: x }]}>
       <View style={[styles.chair, styles.chairL, filled && styles.chairFilled]} />
       <View style={[styles.chair, styles.chairR, filled && styles.chairFilled]} />
+      {seats >= 3 ? (
+        <View style={[styles.chair, styles.chairBack, filled && styles.chairFilled]} />
+      ) : null}
       <View style={[styles.tableTop, filled && styles.tableTopFilled]} />
       {filled ? (
         <>
           <View style={[styles.person, styles.personL]} />
           <View style={[styles.person, styles.personR]} />
+          {seats >= 3 ? <View style={[styles.person, styles.personBack]} /> : null}
           <View style={styles.plate} />
         </>
       ) : null}
@@ -181,12 +168,16 @@ function RoundTable({ x, filled = false }) {
 function Queue() {
   return (
     <View style={styles.queue}>
-      {[0, 1, 2, 3, 4, 5].map((i) => (
+      {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
         <View
           key={i}
           style={[
             styles.queuePerson,
-            { left: i * 13, height: 30 + (i % 3) * 3 },
+            {
+              left: i * 11,
+              height: 28 + (i % 4) * 3,
+              width: 11,
+            },
           ]}
         />
       ))}
@@ -344,6 +335,14 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: 'rgba(80,50,20,0.35)',
   },
+  insideGuest: {
+    position: 'absolute',
+    bottom: 14,
+    width: 8,
+    height: 14,
+    borderRadius: 4,
+    backgroundColor: 'rgba(30,24,20,0.75)',
+  },
   door: {
     width: '16%',
     height: '78%',
@@ -378,8 +377,8 @@ const styles = StyleSheet.create({
   },
   groundGlow: {
     position: 'absolute',
-    left: '8%',
-    right: '8%',
+    left: '4%',
+    right: '4%',
     bottom: 0,
     height: 28,
     borderRadius: 999,
@@ -388,17 +387,17 @@ const styles = StyleSheet.create({
   tableWrap: {
     position: 'absolute',
     bottom: 10,
-    width: 56,
-    height: 48,
+    width: 52,
+    height: 52,
     alignItems: 'center',
   },
   tableTop: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     backgroundColor: '#9aa3ab',
     zIndex: 2,
-    marginTop: 10,
+    marginTop: 12,
     borderWidth: 3,
     borderColor: '#7d868e',
   },
@@ -408,26 +407,28 @@ const styles = StyleSheet.create({
   },
   chair: {
     position: 'absolute',
-    top: 22,
-    width: 14,
-    height: 16,
+    top: 24,
+    width: 12,
+    height: 14,
     borderRadius: 3,
     backgroundColor: '#8b949c',
   },
   chairL: { left: 0 },
   chairR: { right: 0 },
+  chairBack: { left: '38%', top: 6 },
   chairFilled: { backgroundColor: '#6b5344' },
   person: {
     position: 'absolute',
-    top: 0,
-    width: 12,
-    height: 18,
+    top: 2,
+    width: 11,
+    height: 17,
     borderRadius: 6,
     backgroundColor: '#1a1f24',
     zIndex: 3,
   },
-  personL: { left: 4 },
-  personR: { right: 4 },
+  personL: { left: 2 },
+  personR: { right: 2 },
+  personBack: { left: '38%', top: -2 },
   plate: {
     position: 'absolute',
     top: 20,
@@ -439,15 +440,14 @@ const styles = StyleSheet.create({
   },
   queue: {
     position: 'absolute',
-    right: '10%',
-    bottom: 8,
-    width: 90,
-    height: 40,
+    right: '6%',
+    bottom: 6,
+    width: 110,
+    height: 42,
   },
   queuePerson: {
     position: 'absolute',
     bottom: 0,
-    width: 12,
     borderTopLeftRadius: 6,
     borderTopRightRadius: 6,
     backgroundColor: '#11161c',
