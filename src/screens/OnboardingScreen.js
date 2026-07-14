@@ -24,7 +24,7 @@ const C = {
 };
 
 /**
- * Connect — simple Empty/Packed restaurant graphic + Trusty CTA.
+ * Connect — large auto Empty/Packed restaurant graphic + Trusty CTA.
  */
 export function OnboardingScreen({ navigation }) {
   const { connectBusiness } = useReviews();
@@ -35,16 +35,11 @@ export function OnboardingScreen({ navigation }) {
     enter.value = withDelay(40, withSpring(1, { damping: 16, stiffness: 92 }));
   }, [enter]);
 
-  useEffect(() => {
-    const t = setTimeout(() => setScene('after'), 1600);
-    return () => clearTimeout(t);
-  }, []);
-
   const heroStyle = useAnimatedStyle(() => ({
     opacity: enter.value,
     transform: [
       {
-        translateY: interpolate(enter.value, [0, 1], [24, 0], Extrapolation.CLAMP),
+        translateY: interpolate(enter.value, [0, 1], [20, 0], Extrapolation.CLAMP),
       },
     ],
   }));
@@ -52,8 +47,6 @@ export function OnboardingScreen({ navigation }) {
   const stageStyle = useAnimatedStyle(() => ({
     opacity: interpolate(enter.value, [0, 1], [0, 1]),
   }));
-
-  const packed = scene === 'after';
 
   return (
     <View style={styles.root}>
@@ -71,13 +64,12 @@ export function OnboardingScreen({ navigation }) {
             Trusty
           </Text>
           <Text style={styles.headline}>
-            Stay on top of{'\n'}
+            Stay on top of{' '}
             <Text style={styles.headlineAccent}>every guest review.</Text>
           </Text>
           <Text style={styles.copy}>
-            {packed
-              ? 'Catch feedback early. Reply from one place. Keep the nights that pack the house.'
-              : 'Missed reviews empty the room. Flip to Packed to see what staying on top looks like.'}
+            Catch feedback early. Reply from one place. Keep the nights that pack
+            the house.
           </Text>
 
           <HeroCta label="Try the demo" onPress={connectBusiness} />
@@ -99,56 +91,58 @@ const styles = StyleSheet.create({
   },
   safe: {
     flex: 1,
-    paddingHorizontal: 22,
+    paddingHorizontal: 18,
   },
   stage: {
-    paddingTop: 8,
-    marginBottom: 18,
+    flex: 1.15,
+    minHeight: 320,
+    paddingTop: 4,
+    marginBottom: 12,
   },
   hero: {
-    paddingBottom: 12,
+    paddingBottom: 8,
   },
   eyebrow: {
     color: C.accent,
     fontSize: 11,
     fontWeight: '800',
     letterSpacing: 1.6,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   brand: {
     color: C.ink,
-    fontSize: 48,
+    fontSize: 42,
     fontWeight: '900',
-    letterSpacing: -1.2,
+    letterSpacing: -1.1,
     paddingLeft: 2,
     paddingRight: 8,
     includeFontPadding: false,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   headline: {
     color: C.ink,
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '700',
-    letterSpacing: -0.4,
-    lineHeight: 30,
-    marginBottom: 10,
+    letterSpacing: -0.3,
+    lineHeight: 26,
+    marginBottom: 8,
   },
   headlineAccent: {
     color: C.accent,
   },
   copy: {
     color: C.muted,
-    fontSize: 15,
-    lineHeight: 22,
-    marginBottom: 20,
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 16,
     maxWidth: 440,
   },
   hint: {
-    marginTop: 14,
+    marginTop: 12,
     color: C.dim,
     fontSize: 12,
   },
   legal: {
-    marginTop: 12,
+    marginTop: 10,
   },
 });
