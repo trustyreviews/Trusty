@@ -21,11 +21,10 @@ const C = {
   muted: 'rgba(247,248,245,0.68)',
   dim: 'rgba(247,248,245,0.4)',
   accent: '#2dd4bf',
-  danger: '#fb7185',
 };
 
 /**
- * Connect — MotionSites Empty/Packed restaurant hero (real photo + lighting morph).
+ * Connect — simple Empty/Packed restaurant graphic + Trusty CTA.
  */
 export function OnboardingScreen({ navigation }) {
   const { connectBusiness } = useReviews();
@@ -37,7 +36,7 @@ export function OnboardingScreen({ navigation }) {
   }, [enter]);
 
   useEffect(() => {
-    const t = setTimeout(() => setScene('after'), 1700);
+    const t = setTimeout(() => setScene('after'), 1600);
     return () => clearTimeout(t);
   }, []);
 
@@ -45,21 +44,16 @@ export function OnboardingScreen({ navigation }) {
     opacity: enter.value,
     transform: [
       {
-        translateY: interpolate(enter.value, [0, 1], [28, 0], Extrapolation.CLAMP),
+        translateY: interpolate(enter.value, [0, 1], [24, 0], Extrapolation.CLAMP),
       },
     ],
   }));
 
   const stageStyle = useAnimatedStyle(() => ({
     opacity: interpolate(enter.value, [0, 1], [0, 1]),
-    transform: [
-      {
-        scale: interpolate(enter.value, [0, 1], [0.97, 1], Extrapolation.CLAMP),
-      },
-    ],
   }));
 
-  const isAfter = scene === 'after';
+  const packed = scene === 'after';
 
   return (
     <View style={styles.root}>
@@ -77,22 +71,13 @@ export function OnboardingScreen({ navigation }) {
             Trusty
           </Text>
           <Text style={styles.headline}>
-            {isAfter ? (
-              <>
-                Stay on top of{'\n'}
-                <Text style={styles.headlineAccent}>every guest review.</Text>
-              </>
-            ) : (
-              <>
-                Empty tables.{'\n'}
-                <Text style={styles.headlineDanger}>Missed reviews.</Text>
-              </>
-            )}
+            Stay on top of{'\n'}
+            <Text style={styles.headlineAccent}>every guest review.</Text>
           </Text>
           <Text style={styles.copy}>
-            {isAfter
-              ? 'Reply faster. Protect the nights that pack the house. One calm inbox for every Google review.'
-              : 'When feedback sits unanswered, guests stop coming back. Flip to Packed to see the difference.'}
+            {packed
+              ? 'Catch feedback early. Reply from one place. Keep the nights that pack the house.'
+              : 'Missed reviews empty the room. Flip to Packed to see what staying on top looks like.'}
           </Text>
 
           <HeroCta label="Try the demo" onPress={connectBusiness} />
@@ -150,9 +135,6 @@ const styles = StyleSheet.create({
   },
   headlineAccent: {
     color: C.accent,
-  },
-  headlineDanger: {
-    color: C.danger,
   },
   copy: {
     color: C.muted,
