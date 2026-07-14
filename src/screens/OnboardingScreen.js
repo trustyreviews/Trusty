@@ -196,8 +196,8 @@ function createStyles(colors, fonts) {
       right: 22,
     },
     glassB: {
-      top: '28%',
-      left: 18,
+      top: '22%',
+      left: 24,
     },
     glassTop: {
       flexDirection: 'row',
@@ -255,9 +255,10 @@ function createStyles(colors, fonts) {
     content: {
       flex: 1,
       justifyContent: 'flex-end',
-      paddingHorizontal: 28,
+      paddingHorizontal: 32,
       paddingBottom: 44,
       zIndex: 2,
+      overflow: 'visible',
     },
     eyebrow: {
       color: colors.accent,
@@ -270,8 +271,9 @@ function createStyles(colors, fonts) {
       color: colors.text,
       fontSize: 52,
       fontFamily: fonts.displayBold,
-      letterSpacing: -1.6,
+      letterSpacing: -1.2,
       marginBottom: 14,
+      paddingLeft: 2,
     },
     headline: {
       color: colors.text,
