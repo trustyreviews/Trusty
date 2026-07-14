@@ -32,8 +32,8 @@ export function OnboardingBackground() {
   const mountRef = useRef(null);
 
   const veil = isLight
-    ? 'rgba(244,245,247,0.55)'
-    : 'rgba(11,12,14,0.52)';
+    ? 'rgba(244,245,247,0.28)'
+    : 'rgba(11,12,14,0.28)';
 
   useEffect(() => {
     let cancelled = false;
