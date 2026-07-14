@@ -3,310 +3,265 @@ import { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
+  Extrapolation,
   interpolate,
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
   withRepeat,
   withSequence,
+  withSpring,
   withTiming,
 } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { BusinessMotionBackdrop } from '../components/BusinessMotionBackdrop';
 import { ConnectBusinessButton } from '../components/ConnectBusinessButton';
 import { LegalLinks } from '../components/LegalLinks';
-import { OnboardingBackground } from '../components/OnboardingBackground';
 import { useReviews } from '../context/ReviewsContext';
-import { useTheme } from '../context/ThemeContext';
-import { useThemedStyles } from '../hooks/useThemedStyles';
+
+const C = {
+  ink: '#faf7f2',
+  muted: 'rgba(250,247,242,0.7)',
+  dim: 'rgba(250,247,242,0.4)',
+  amber: '#ffb020',
+  danger: '#ff4d5e',
+  glass: 'rgba(12,12,14,0.72)',
+  line: 'rgba(255,255,255,0.14)',
+};
 
 /**
- * Connect-business screen — MotionSites-grade entrance:
- * staggered typography, floating glass review cards, premium CTA.
+ * Connect screen — booming restaurant photo marquees, centered UI (no clip),
+ * shock entrance, floating review hits.
  */
 export function OnboardingScreen({ navigation }) {
   const { connectBusiness } = useReviews();
-  const { colors, themeId } = useTheme();
-  const styles = useThemedStyles(createStyles);
-  const statusBarStyle = themeId === 'daylight' ? 'dark' : 'light';
 
-  const t = useSharedValue(0);
+  const enter = useSharedValue(0);
+  const punch = useSharedValue(0);
   const float = useSharedValue(0);
 
   useEffect(() => {
-    t.value = withTiming(1, {
-      duration: 1100,
-      easing: Easing.out(Easing.cubic),
-    });
-    float.value = withRepeat(
-      withSequence(
-        withTiming(1, { duration: 4200, easing: Easing.inOut(Easing.sin) }),
-        withTiming(0, { duration: 4200, easing: Easing.inOut(Easing.sin) })
-      ),
-      -1,
-      false
+    punch.value = withSequence(
+      withTiming(1, { duration: 140, easing: Easing.out(Easing.quad) }),
+      withTiming(0, { duration: 480, easing: Easing.in(Easing.cubic) })
     );
-  }, [t, float]);
+    enter.value = withDelay(
+      200,
+      withSpring(1, { damping: 14, stiffness: 90 })
+    );
+    float.value = withDelay(
+      900,
+      withRepeat(
+        withSequence(
+          withTiming(1, { duration: 3800, easing: Easing.inOut(Easing.sin) }),
+          withTiming(0, { duration: 3800, easing: Easing.inOut(Easing.sin) })
+        ),
+        -1,
+        false
+      )
+    );
+  }, [enter, punch, float]);
 
-  const brandStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(t.value, [0, 0.35], [0, 1]),
+  const flashStyle = useAnimatedStyle(() => ({
+    opacity: punch.value * 0.85,
+  }));
+
+  const heroStyle = useAnimatedStyle(() => ({
+    opacity: enter.value,
     transform: [
-      { translateY: interpolate(t.value, [0, 0.45], [36, 0]) },
-      { scale: interpolate(t.value, [0, 0.45], [0.94, 1]) },
+      {
+        translateY: interpolate(enter.value, [0, 1], [40, 0], Extrapolation.CLAMP),
+      },
+      {
+        scale: interpolate(enter.value, [0, 1], [0.92, 1], Extrapolation.CLAMP),
+      },
     ],
   }));
 
-  const line1Style = useAnimatedStyle(() => ({
-    opacity: interpolate(t.value, [0.12, 0.5], [0, 1]),
-    transform: [{ translateY: interpolate(t.value, [0.12, 0.5], [28, 0]) }],
-  }));
-
-  const line2Style = useAnimatedStyle(() => ({
-    opacity: interpolate(t.value, [0.22, 0.6], [0, 1]),
-    transform: [{ translateY: interpolate(t.value, [0.22, 0.6], [28, 0]) }],
-  }));
-
-  const copyStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(t.value, [0.35, 0.75], [0, 1]),
-    transform: [{ translateY: interpolate(t.value, [0.35, 0.75], [18, 0]) }],
-  }));
-
-  const metaStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(t.value, [0.55, 1], [0, 1]),
-  }));
-
-  const cardAStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(t.value, [0.25, 0.65], [0, 1]),
+  const cardLeftStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(enter.value, [0.35, 1], [0, 1]),
     transform: [
-      { translateY: interpolate(float.value, [0, 1], [0, -14]) },
+      { translateY: interpolate(float.value, [0, 1], [0, -12]) },
       { translateX: interpolate(float.value, [0, 1], [0, 6]) },
-      { rotate: `${interpolate(float.value, [0, 1], [-2, 1.5])}deg` },
+      { rotate: `${interpolate(float.value, [0, 1], [-3, 1])}deg` },
     ],
   }));
 
-  const cardBStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(t.value, [0.35, 0.75], [0, 0.95]),
+  const cardRightStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(enter.value, [0.45, 1], [0, 1]),
     transform: [
-      { translateY: interpolate(float.value, [0, 1], [0, 12]) },
-      { translateX: interpolate(float.value, [0, 1], [0, -8]) },
-      { rotate: `${interpolate(float.value, [0, 1], [3, -1])}deg` },
+      { translateY: interpolate(float.value, [0, 1], [0, 10]) },
+      { translateX: interpolate(float.value, [0, 1], [0, -5]) },
+      { rotate: `${interpolate(float.value, [0, 1], [2.5, -1])}deg` },
     ],
-  }));
-
-  const pulseStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(float.value, [0, 1], [0.35, 0.75]),
-    transform: [{ scale: interpolate(float.value, [0, 1], [1, 1.08]) }],
   }));
 
   return (
-    <View style={styles.container}>
-      <OnboardingBackground />
-      <StatusBar style={statusBarStyle} />
+    <View style={styles.root}>
+      <StatusBar style="light" />
+      <BusinessMotionBackdrop />
 
-      {/* Floating glass review UI — separate from liquid-metal hero */}
-      <View pointerEvents="none" style={styles.stage}>
-        <Animated.View style={[styles.glass, styles.glassA, cardAStyle]}>
-          <View style={styles.glassTop}>
-            <Text style={styles.glassName}>Maya R.</Text>
-            <View style={[styles.pill, { backgroundColor: colors.accentSoft }]}>
-              <Text style={[styles.pillText, { color: colors.accent }]}>5★</Text>
-            </View>
-          </View>
-          <Text style={styles.glassBody}>“Best patio brunch in town.”</Text>
-        </Animated.View>
+      <Animated.View pointerEvents="none" style={[styles.flash, flashStyle]} />
 
-        <Animated.View style={[styles.glass, styles.glassB, cardBStyle]}>
-          <View style={styles.glassTop}>
-            <Text style={styles.glassName}>Alex M.</Text>
-            <View style={[styles.pill, { backgroundColor: colors.dangerSoft }]}>
-              <Text style={[styles.pillText, { color: colors.dangerText }]}>
-                1★ urgent
-              </Text>
-            </View>
-          </View>
-          <Text style={styles.glassBody}>“Waited 40 min. Food arrived cold.”</Text>
-        </Animated.View>
+      <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+        <View style={styles.stage}>
+          <Animated.View style={[styles.card, styles.cardLeft, cardLeftStyle]}>
+            <Text style={styles.badgeHot}>1★ URGENT</Text>
+            <Text style={styles.cardQuote}>
+              “Waited 40 min. Food arrived cold.”
+            </Text>
+            <Text style={styles.cardMeta}>Alex M. · Google</Text>
+          </Animated.View>
 
-        <Animated.View style={[styles.liveChip, pulseStyle]}>
-          <View style={[styles.liveDot, { backgroundColor: colors.accent }]} />
-          <Text style={styles.liveText}>Live review inbox</Text>
-        </Animated.View>
-      </View>
+          <Animated.View style={[styles.card, styles.cardRight, cardRightStyle]}>
+            <Text style={styles.badgeWin}>5★ BOOMING</Text>
+            <Text style={styles.cardQuote}>
+              “Best patio brunch in town.”
+            </Text>
+            <Text style={styles.cardMeta}>Maya R. · Google</Text>
+          </Animated.View>
+        </View>
 
-      <View style={styles.content}>
-        <Animated.Text style={[styles.eyebrow, brandStyle]}>
-          FOR RESTAURANTS & LOCAL SPOTS
-        </Animated.Text>
+        <Animated.View style={[styles.hero, heroStyle]}>
+          <Text style={styles.eyebrow}>RESTAURANTS · CAFES · LOCAL LEGENDS</Text>
+          <Text style={styles.brand} numberOfLines={1} adjustsFontSizeToFit>
+            Trusty
+          </Text>
+          <Text style={styles.headline}>
+            The review inbox for{'\n'}
+            <Text style={styles.headlineAccent}>booming businesses.</Text>
+          </Text>
+          <Text style={styles.copy}>
+            Catch every Google review in one place. Reply faster. Turn praise into
+            posts. Protect the nights that pack the house.
+          </Text>
 
-        <Animated.Text style={[styles.brand, brandStyle]}>Trusty</Animated.Text>
+          <ConnectBusinessButton
+            label="Connect your business"
+            onPress={connectBusiness}
+            accentColor="#ffb020"
+            labelColor="#140c02"
+          />
 
-        <Animated.Text style={[styles.headline, line1Style]}>
-          Stay on top of
-        </Animated.Text>
-        <Animated.Text style={[styles.headlineAccent, line2Style]}>
-          every guest review.
-        </Animated.Text>
-
-        <Animated.Text style={[styles.copy, copyStyle]}>
-          Connect Google Business Profile. Catch negative feedback early. Reply
-          from one calm place.
-        </Animated.Text>
-
-        <ConnectBusinessButton
-          // TODO: Google OAuth entry point — replace connectBusiness() with AuthSession
-          // against Google Business Profile, then fetch real locations + reviews.
-          onPress={connectBusiness}
-        />
-
-        <Animated.View style={metaStyle}>
           <Text style={styles.hint}>
             Demo mode — loads sample Riverside Coffee Co. data
           </Text>
           <LegalLinks navigation={navigation} style={styles.legal} />
         </Animated.View>
-      </View>
+      </SafeAreaView>
     </View>
   );
 }
 
-function createStyles(colors, fonts) {
-  return {
-    container: {
-      flex: 1,
-      backgroundColor: colors.bg,
-    },
-    stage: {
-      ...StyleSheet.absoluteFillObject,
-      zIndex: 1,
-    },
-    glass: {
-      position: 'absolute',
-      borderRadius: 18,
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.surface,
-      paddingVertical: 14,
-      paddingHorizontal: 16,
-      shadowColor: '#000',
-      shadowOpacity: 0.28,
-      shadowRadius: 24,
-      shadowOffset: { width: 0, height: 14 },
-      elevation: 8,
-      maxWidth: 260,
-    },
-    glassA: {
-      top: '14%',
-      right: 22,
-    },
-    glassB: {
-      top: '22%',
-      left: 24,
-    },
-    glassTop: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: 10,
-      marginBottom: 8,
-    },
-    glassName: {
-      color: colors.text,
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 14,
-    },
-    glassBody: {
-      color: colors.textMuted,
-      fontFamily: fonts.sans,
-      fontSize: 13,
-      lineHeight: 19,
-    },
-    pill: {
-      borderRadius: 999,
-      paddingHorizontal: 8,
-      paddingVertical: 3,
-    },
-    pillText: {
-      fontSize: 11,
-      fontFamily: fonts.sansBold,
-      letterSpacing: 0.2,
-    },
-    liveChip: {
-      position: 'absolute',
-      top: '42%',
-      alignSelf: 'center',
-      left: '28%',
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      paddingHorizontal: 12,
-      paddingVertical: 8,
-      borderRadius: 999,
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.panel,
-    },
-    liveDot: {
-      width: 7,
-      height: 7,
-      borderRadius: 4,
-    },
-    liveText: {
-      color: colors.textMuted,
-      fontSize: 12,
-      fontFamily: fonts.sansSemiBold,
-    },
-    content: {
-      flex: 1,
-      justifyContent: 'flex-end',
-      paddingHorizontal: 32,
-      paddingBottom: 44,
-      zIndex: 2,
-      overflow: 'visible',
-    },
-    eyebrow: {
-      color: colors.accent,
-      fontSize: 11,
-      fontFamily: fonts.sansBold,
-      letterSpacing: 1.8,
-      marginBottom: 14,
-    },
-    brand: {
-      color: colors.text,
-      fontSize: 52,
-      fontFamily: fonts.displayBold,
-      letterSpacing: -1.2,
-      marginBottom: 14,
-      paddingLeft: 2,
-    },
-    headline: {
-      color: colors.text,
-      fontSize: 28,
-      fontFamily: fonts.sansSemiBold,
-      letterSpacing: -0.6,
-      lineHeight: 34,
-    },
-    headlineAccent: {
-      color: colors.accent,
-      fontSize: 28,
-      fontFamily: fonts.sansBold,
-      letterSpacing: -0.6,
-      lineHeight: 34,
-      marginBottom: 14,
-    },
-    copy: {
-      color: colors.textMuted,
-      fontSize: 16,
-      lineHeight: 24,
-      marginBottom: 28,
-      fontFamily: fonts.sans,
-      maxWidth: 420,
-    },
-    hint: {
-      marginTop: 16,
-      color: colors.textDim,
-      fontSize: 13,
-      textAlign: 'center',
-      fontFamily: fonts.sans,
-    },
-    legal: {
-      marginTop: 22,
-    },
-  };
-}
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: '#050505',
+  },
+  flash: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#fff4e5',
+    zIndex: 20,
+  },
+  safe: {
+    flex: 1,
+    // Keep all copy inset — fixes left-edge “rusty” clipping
+    paddingHorizontal: 28,
+  },
+  stage: {
+    flex: 1,
+    minHeight: 160,
+    justifyContent: 'center',
+  },
+  card: {
+    position: 'absolute',
+    width: '46%',
+    maxWidth: 200,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: C.line,
+    backgroundColor: C.glass,
+    padding: 12,
+  },
+  cardLeft: {
+    left: 0,
+    top: '18%',
+  },
+  cardRight: {
+    right: 0,
+    top: '38%',
+  },
+  badgeHot: {
+    color: C.danger,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+    marginBottom: 6,
+  },
+  badgeWin: {
+    color: C.amber,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+    marginBottom: 6,
+  },
+  cardQuote: {
+    color: C.ink,
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '600',
+  },
+  cardMeta: {
+    marginTop: 8,
+    color: C.dim,
+    fontSize: 11,
+  },
+  hero: {
+    paddingBottom: 20,
+  },
+  eyebrow: {
+    color: C.amber,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1.6,
+    marginBottom: 12,
+  },
+  brand: {
+    color: C.ink,
+    fontSize: 56,
+    fontWeight: '900',
+    letterSpacing: -1.4,
+    // Extra inset so first glyph never clips (was showing “rusty”)
+    paddingLeft: 2,
+    paddingRight: 8,
+    includeFontPadding: false,
+    marginBottom: 10,
+  },
+  headline: {
+    color: C.ink,
+    fontSize: 26,
+    fontWeight: '700',
+    letterSpacing: -0.5,
+    lineHeight: 32,
+    marginBottom: 12,
+  },
+  headlineAccent: {
+    color: C.amber,
+  },
+  copy: {
+    color: C.muted,
+    fontSize: 15,
+    lineHeight: 23,
+    marginBottom: 24,
+    maxWidth: 440,
+  },
+  hint: {
+    marginTop: 14,
+    color: C.dim,
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  legal: {
+    marginTop: 16,
+  },
+});

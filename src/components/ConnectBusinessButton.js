@@ -20,8 +20,12 @@ import { useTheme } from '../context/ThemeContext';
 export function ConnectBusinessButton({
   label = 'Connect your business',
   onPress,
+  accentColor,
+  labelColor,
 }) {
   const { colors, fonts } = useTheme();
+  const bg = accentColor ?? colors.accent;
+  const fg = labelColor ?? colors.onAccent;
   const pressed = useSharedValue(0);
   const shimmer = useSharedValue(0);
   const glow = useSharedValue(0);
@@ -98,8 +102,8 @@ export function ConnectBusinessButton({
       style={[
         styles.shell,
         {
-          backgroundColor: colors.accent,
-          shadowColor: colors.accent,
+          backgroundColor: bg,
+          shadowColor: bg,
         },
         shellStyle,
       ]}
@@ -120,7 +124,7 @@ export function ConnectBusinessButton({
         <Animated.Text
           style={[
             styles.label,
-            { color: colors.onAccent, fontFamily: fonts.sansBold },
+            { color: fg, fontFamily: fonts.sansBold },
             labelStyle,
           ]}
           numberOfLines={1}
@@ -136,7 +140,7 @@ export function ConnectBusinessButton({
           ]}
         >
           <View style={styles.railInner}>
-            <Feather name="arrow-right" size={20} color={colors.onAccent} />
+            <Feather name="arrow-right" size={20} color={fg} />
           </View>
         </Animated.View>
       </Pressable>
