@@ -49,6 +49,20 @@ export function RestaurantHeroScene({ scene, onChange }) {
         <Animated.View style={[styles.nightSky, nightWash]} />
 
         <View style={styles.sidewalk} />
+        <View style={styles.street} />
+
+        {/* Empty street — quiet, maybe one distant parked car outline */}
+        <Animated.View style={[styles.streetLayer, emptyStyle]} pointerEvents="none">
+          <Car left="72%" color="#9aa3ab" dim />
+        </Animated.View>
+
+        {/* Packed street — cars with headlights */}
+        <Animated.View style={[styles.streetLayer, packedStyle]} pointerEvents="none">
+          <Car left="4%" color="#2dd4bf" lit />
+          <Car left="28%" color="#c45c4a" lit />
+          <Car left="52%" color="#f0c56a" lit />
+          <Car left="74%" color="#4a6fa5" lit />
+        </Animated.View>
 
         <View style={styles.building}>
           <View style={styles.awning}>
@@ -241,6 +255,24 @@ function Queue() {
   );
 }
 
+function Car({ left, color, lit = false, dim = false }) {
+  return (
+    <View style={[styles.car, { left }, dim && styles.carDim]}>
+      <View style={[styles.carBody, { backgroundColor: color }]} />
+      <View style={[styles.carCabin, { backgroundColor: lit ? '#ffe9a8' : '#5a6570' }]} />
+      <View style={[styles.wheel, styles.wheelL]} />
+      <View style={[styles.wheel, styles.wheelR]} />
+      {lit ? (
+        <>
+          <View style={[styles.headlight, styles.headL]} />
+          <View style={[styles.headlight, styles.headR]} />
+          <View style={styles.headBeam} />
+        </>
+      ) : null}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   wrap: {
     width: '100%',
@@ -269,17 +301,88 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: 58,
-    height: 52,
+    bottom: 78,
+    height: 40,
     backgroundColor: '#c5cbc8',
+  },
+  street: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 52,
+    height: 28,
+    backgroundColor: '#3a4048',
+  },
+  streetLayer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 54,
+    height: 36,
+    zIndex: 3,
+  },
+  car: {
+    position: 'absolute',
+    bottom: 2,
+    width: 54,
+    height: 28,
+  },
+  carDim: {
+    opacity: 0.45,
+  },
+  carBody: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 4,
+    height: 12,
+    borderRadius: 4,
+  },
+  carCabin: {
+    position: 'absolute',
+    left: 10,
+    right: 14,
+    bottom: 14,
+    height: 12,
+    borderTopLeftRadius: 6,
+    borderTopRightRadius: 6,
+  },
+  wheel: {
+    position: 'absolute',
+    bottom: 0,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#1a1f24',
+  },
+  wheelL: { left: 8 },
+  wheelR: { right: 8 },
+  headlight: {
+    position: 'absolute',
+    bottom: 8,
+    width: 5,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#fff4c8',
+  },
+  headL: { left: 2 },
+  headR: { left: 10 },
+  headBeam: {
+    position: 'absolute',
+    left: -18,
+    bottom: 6,
+    width: 22,
+    height: 10,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,240,180,0.22)',
   },
   building: {
     position: 'absolute',
     left: '8%',
     right: '8%',
-    bottom: 108,
-    height: '58%',
-    maxHeight: 260,
+    bottom: 116,
+    height: '52%',
+    maxHeight: 240,
   },
   awning: {
     height: 28,
@@ -428,7 +531,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: 68,
+    bottom: 86,
     height: 100,
   },
   groundGlow: {
