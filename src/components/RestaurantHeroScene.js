@@ -85,12 +85,18 @@ export function RestaurantHeroScene({ scene, onChange }) {
 
         <Animated.View style={[styles.patio, packedStyle]} pointerEvents="none">
           <View style={styles.groundGlow} />
-          <RoundTable x="4%" filled seats={3} />
-          <RoundTable x="24%" filled seats={2} />
-          <RoundTable x="44%" filled seats={3} />
-          <RoundTable x="64%" filled seats={2} />
-          <RoundTable x="82%" filled seats={2} />
+          {/* Front row — full tables */}
+          <RoundTable x="1%" filled seats={4} />
+          <RoundTable x="18%" filled seats={3} />
+          <RoundTable x="35%" filled seats={4} />
+          <RoundTable x="52%" filled seats={3} />
+          <RoundTable x="68%" filled seats={4} />
+          {/* Standing crowd between tables */}
+          <CrowdRow y={8} count={14} start={4} step={7} />
+          <CrowdRow y={22} count={12} start={10} step={7.5} taller />
+          {/* Long line at the door */}
           <Queue />
+          <CrowdSpill />
         </Animated.View>
 
         <View style={styles.toggleOverlay}>
@@ -124,8 +130,11 @@ function Window({ emptyStyle, packedStyle, wide = false, guests = false }) {
           <View style={styles.insideTable} />
           {guests ? (
             <>
-              <View style={[styles.insideGuest, { left: '18%' }]} />
-              <View style={[styles.insideGuest, { right: '18%' }]} />
+              <View style={[styles.insideGuest, { left: '8%' }]} />
+              <View style={[styles.insideGuest, { left: '28%' }]} />
+              <View style={[styles.insideGuest, { right: '28%' }]} />
+              <View style={[styles.insideGuest, { right: '8%' }]} />
+              <View style={[styles.insideGuest, styles.insideGuestTall, { left: '48%' }]} />
             </>
           ) : null}
         </View>
@@ -152,12 +161,16 @@ function RoundTable({ x, filled = false, seats = 2 }) {
       {seats >= 3 ? (
         <View style={[styles.chair, styles.chairBack, filled && styles.chairFilled]} />
       ) : null}
+      {seats >= 4 ? (
+        <View style={[styles.chair, styles.chairFront, filled && styles.chairFilled]} />
+      ) : null}
       <View style={[styles.tableTop, filled && styles.tableTopFilled]} />
       {filled ? (
         <>
           <View style={[styles.person, styles.personL]} />
           <View style={[styles.person, styles.personR]} />
           {seats >= 3 ? <View style={[styles.person, styles.personBack]} /> : null}
+          {seats >= 4 ? <View style={[styles.person, styles.personFront]} /> : null}
           <View style={styles.plate} />
         </>
       ) : null}
@@ -165,18 +178,61 @@ function RoundTable({ x, filled = false, seats = 2 }) {
   );
 }
 
+function CrowdRow({ y, count, start, step, taller = false }) {
+  return (
+    <View style={[styles.crowdRow, { bottom: y }]}>
+      {Array.from({ length: count }).map((_, i) => (
+        <View
+          key={i}
+          style={[
+            styles.crowdPerson,
+            {
+              left: `${start + i * step}%`,
+              height: (taller ? 34 : 28) + (i % 5) * 2,
+              width: taller ? 12 : 10,
+              backgroundColor: i % 3 === 0 ? '#1a1f24' : i % 3 === 1 ? '#2a2220' : '#14181e',
+            },
+          ]}
+        />
+      ))}
+    </View>
+  );
+}
+
+function CrowdSpill() {
+  // Extra dense cluster near the entrance
+  return (
+    <View style={styles.spill}>
+      {Array.from({ length: 10 }).map((_, i) => (
+        <View
+          key={i}
+          style={[
+            styles.spillPerson,
+            {
+              left: (i % 5) * 12,
+              bottom: Math.floor(i / 5) * 10,
+              height: 26 + (i % 4) * 3,
+            },
+          ]}
+        />
+      ))}
+    </View>
+  );
+}
+
 function Queue() {
   return (
     <View style={styles.queue}>
-      {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+      {Array.from({ length: 16 }).map((_, i) => (
         <View
           key={i}
           style={[
             styles.queuePerson,
             {
-              left: i * 11,
-              height: 28 + (i % 4) * 3,
-              width: 11,
+              left: i * 9,
+              height: 26 + (i % 5) * 3,
+              width: 10,
+              backgroundColor: i % 2 === 0 ? '#11161c' : '#1c1816',
             },
           ]}
         />
@@ -372,29 +428,30 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: 72,
-    height: 78,
+    bottom: 68,
+    height: 100,
   },
   groundGlow: {
     position: 'absolute',
-    left: '4%',
-    right: '4%',
+    left: '2%',
+    right: '2%',
     bottom: 0,
-    height: 28,
+    height: 40,
     borderRadius: 999,
-    backgroundColor: 'rgba(255,180,70,0.2)',
+    backgroundColor: 'rgba(255,180,70,0.28)',
   },
   tableWrap: {
     position: 'absolute',
-    bottom: 10,
-    width: 52,
-    height: 52,
+    bottom: 28,
+    width: 48,
+    height: 48,
     alignItems: 'center',
+    zIndex: 2,
   },
   tableTop: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     backgroundColor: '#9aa3ab',
     zIndex: 2,
     marginTop: 12,
@@ -407,56 +464,90 @@ const styles = StyleSheet.create({
   },
   chair: {
     position: 'absolute',
-    top: 24,
-    width: 12,
-    height: 14,
+    top: 22,
+    width: 11,
+    height: 13,
     borderRadius: 3,
     backgroundColor: '#8b949c',
   },
   chairL: { left: 0 },
   chairR: { right: 0 },
-  chairBack: { left: '38%', top: 6 },
+  chairBack: { left: '36%', top: 4 },
+  chairFront: { left: '36%', top: 34, zIndex: 5 },
   chairFilled: { backgroundColor: '#6b5344' },
   person: {
     position: 'absolute',
     top: 2,
-    width: 11,
-    height: 17,
-    borderRadius: 6,
+    width: 10,
+    height: 16,
+    borderRadius: 5,
     backgroundColor: '#1a1f24',
     zIndex: 3,
   },
-  personL: { left: 2 },
-  personR: { right: 2 },
-  personBack: { left: '38%', top: -2 },
+  personL: { left: 1 },
+  personR: { right: 1 },
+  personBack: { left: '36%', top: -4 },
+  personFront: { left: '36%', top: 28, zIndex: 6 },
   plate: {
     position: 'absolute',
-    top: 20,
-    width: 10,
-    height: 10,
+    top: 18,
+    width: 9,
+    height: 9,
     borderRadius: 5,
     backgroundColor: '#f4f1ea',
     zIndex: 4,
   },
-  queue: {
+  crowdRow: {
     position: 'absolute',
-    right: '6%',
-    bottom: 6,
-    width: 110,
+    left: 0,
+    right: 0,
     height: 42,
+    zIndex: 4,
   },
-  queuePerson: {
+  crowdPerson: {
     position: 'absolute',
     bottom: 0,
     borderTopLeftRadius: 6,
     borderTopRightRadius: 6,
-    backgroundColor: '#11161c',
+  },
+  spill: {
+    position: 'absolute',
+    right: '18%',
+    bottom: 4,
+    width: 70,
+    height: 48,
+    zIndex: 5,
+  },
+  spillPerson: {
+    position: 'absolute',
+    width: 11,
+    borderTopLeftRadius: 6,
+    borderTopRightRadius: 6,
+    backgroundColor: '#16120f',
+  },
+  queue: {
+    position: 'absolute',
+    right: '2%',
+    bottom: 2,
+    width: 150,
+    height: 44,
+    zIndex: 6,
+  },
+  queuePerson: {
+    position: 'absolute',
+    bottom: 0,
+    borderTopLeftRadius: 5,
+    borderTopRightRadius: 5,
+  },
+  insideGuestTall: {
+    height: 16,
+    width: 8,
   },
   toggleOverlay: {
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: 16,
+    bottom: 14,
     alignItems: 'center',
   },
 });
