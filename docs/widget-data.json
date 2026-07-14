@@ -1,0 +1,55 @@
+{
+  "name": "Riverside Coffee Co.",
+  "averageRating": 4.3,
+  "totalReviews": 47,
+  "reviews": [
+    {
+      "authorName": "Jordan Hale",
+      "rating": 5,
+      "text": "Best latte in Springfield, hands down. The baristas remember my order and the riverside patio is perfect on weekends. Already planning my next visit.",
+      "date": "2026-07-11T14:22:00.000Z"
+    },
+    {
+      "authorName": "Elena Brooks",
+      "rating": 5,
+      "text": "Took my parents here for brunch and everything was excellent — avocado toast, cappuccinos, and friendly service. Feels like a neighborhood gem.",
+      "date": "2026-07-06T11:18:00.000Z"
+    },
+    {
+      "authorName": "Sofia Alvarez",
+      "rating": 5,
+      "text": "Their seasonal lavender cold brew is incredible. Clean space, quick service, and they compost their grounds — love the values behind the brand.",
+      "date": "2026-06-30T15:12:00.000Z"
+    },
+    {
+      "authorName": "Morgan Lee",
+      "rating": 5,
+      "text": "Finally a coffee shop that does flat whites properly. Smooth milk, balanced shot, and they never rush you out the door.",
+      "date": "2026-06-14T17:25:00.000Z"
+    },
+    {
+      "authorName": "Nina Kowalski",
+      "rating": 5,
+      "text": "Brought friends visiting from out of town and everyone raved about the house blend. Atmosphere is warm without being trendy for trendy’s sake.",
+      "date": "2026-05-26T18:05:00.000Z"
+    },
+    {
+      "authorName": "Marcus Chen",
+      "rating": 4,
+      "text": "Solid pour-over and a cozy atmosphere for remote work. Wi‑Fi was steady. Only knock is limited pastry options by mid-afternoon.",
+      "date": "2026-07-08T16:40:00.000Z"
+    },
+    {
+      "authorName": "Aisha Rahman",
+      "rating": 4,
+      "text": "Friendly team and consistently good espresso. Parking nearby can be tricky on Saturdays, but worth the stop.",
+      "date": "2026-06-22T13:30:00.000Z"
+    },
+    {
+      "authorName": "Hannah Ortiz",
+      "rating": 4,
+      "text": "Great place to meet clients. Espresso drinks are reliable and the almond croissant sells out early for a reason.",
+      "date": "2026-06-09T09:41:00.000Z"
+    }
+  ]
+}

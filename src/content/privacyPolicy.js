@@ -37,4 +37,4 @@ Trusty is intended for business users and is not directed to children under 13. 
 We may update this Privacy Policy from time to time. We will post the revised version on this page and update the “Last updated” date.
 
 10. Contact
-Questions about this policy or your data: privacy@trusty.app`;
+Questions about this policy or your data: privacy@trustydirect.com`;

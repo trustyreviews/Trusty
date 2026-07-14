@@ -4,9 +4,16 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Trusty — Review inbox for local businesses</title>
+    <link rel="canonical" href="https://trustydirect.com/" />
     <meta
       name="description"
       content="Trusty helps local businesses monitor Google reviews, catch negative feedback early, and reply from one place."
+    />
+    <meta property="og:url" content="https://trustydirect.com/" />
+    <meta property="og:title" content="Trusty — Review inbox for local businesses" />
+    <meta
+      property="og:description"
+      content="Monitor Google reviews, catch negative feedback early, and reply from one place."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -58,6 +65,17 @@
         letter-spacing: -0.03em;
         text-decoration: none;
         color: var(--text);
+      }
+      .logo-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+      }
+      .domain {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--muted);
+        letter-spacing: 0.02em;
       }
       nav a {
         margin-left: 1.25rem;
@@ -136,7 +154,10 @@
   </head>
   <body>
     <header>
-      <a class="logo" href="./index.html">Trusty</a>
+      <div class="logo-wrap">
+        <a class="logo" href="https://trustydirect.com/">Trusty</a>
+        <span class="domain">trustydirect.com</span>
+      </div>
       <nav>
         <a href="./privacy.html">Privacy Policy</a>
       </nav>
@@ -157,13 +178,22 @@
           sell review content or account credentials.
         </p>
       </section>
+      <section class="panel">
+        <h2>Website widget</h2>
+        <p>
+          Embed a live reviews carousel on your site with our widget script at
+          <a href="https://trustydirect.com/widget.js">trustydirect.com/widget.js</a>.
+          Copy the snippet from <strong>Settings → Get your widget code</strong>
+          in the Trusty app.
+        </p>
+      </section>
     </main>
     <footer>
-      <span>© <span id="year"></span> Trusty</span>
+      <span>© <span id="year"></span> Trusty · <a href="https://trustydirect.com/">trustydirect.com</a></span>
       <span>
         <a href="./privacy.html">Privacy Policy</a>
         ·
-        <a href="mailto:privacy@trusty.app">privacy@trusty.app</a>
+        <a href="mailto:privacy@trustydirect.com">privacy@trustydirect.com</a>
       </span>
     </footer>
     <script>
