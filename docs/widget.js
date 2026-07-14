@@ -24,7 +24,7 @@
 
   var base = script.src
     ? script.src.replace(/\/[^/]*$/, '/')
-    : 'https://trustydirect.com/';
+    : 'https://www.trustydirect.com/';
   var dataUrl = script.getAttribute('data-src') || base + 'widget-data.json';
 
   var mount =
@@ -217,7 +217,7 @@
         '<div class="tw-dots">' +
         dots +
         '</div>' +
-        '<div class="tw-foot"><a href="https://trustydirect.com/" target="_blank" rel="noopener">Powered by Trusty</a></div>' +
+        '<div class="tw-foot"><a href="https://www.trustydirect.com/" target="_blank" rel="noopener">Powered by Trusty</a></div>' +
         '</div>';
 
       var buttons = mount.querySelectorAll('.tw-dot');
