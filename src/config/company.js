@@ -7,6 +7,7 @@ export const COMPANY = {
   tagline: 'Review inbox for local businesses',
   supportEmail: 'privacy@trustydirect.com',
   websiteUrl: 'https://www.trustydirect.com/',
+  appUrl: 'https://www.trustydirect.com/app/',
   privacyUrl: 'https://www.trustydirect.com/privacy.html',
   widgetUrl: 'https://www.trustydirect.com/widget.js',
   widgetDataUrl: 'https://www.trustydirect.com/widget-data.json',

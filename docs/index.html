@@ -112,9 +112,29 @@
         font-weight: 700;
         padding: 0.9rem 1.25rem;
         border-radius: 0.75rem;
+        margin-right: 0.75rem;
       }
       .cta:hover {
         background: var(--accent-hover);
+      }
+      .cta-secondary {
+        display: inline-block;
+        color: var(--text);
+        text-decoration: none;
+        font-weight: 600;
+        padding: 0.9rem 1.1rem;
+        border-radius: 0.75rem;
+        border: 1px solid #334155;
+      }
+      .cta-secondary:hover {
+        border-color: var(--muted);
+      }
+      .cta-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+        margin-bottom: 0.5rem;
       }
       .panel {
         margin-top: 3rem;
@@ -159,6 +179,7 @@
         <span class="domain">www.trustydirect.com</span>
       </div>
       <nav>
+        <a href="./app/">Open app</a>
         <a href="./privacy.html">Privacy Policy</a>
       </nav>
     </header>
@@ -169,7 +190,14 @@
         Business Profile, surface negative feedback quickly, and reply from one
         calm place.
       </p>
-      <a class="cta" href="./privacy.html">Read our Privacy Policy</a>
+      <div class="cta-row">
+        <a class="cta" href="./app/">Open Trusty</a>
+        <a class="cta-secondary" href="./privacy.html">Privacy Policy</a>
+      </div>
+      <p class="lead" style="font-size: 0.95rem; margin-top: 1rem; margin-bottom: 0">
+        Try demo mode in your browser — no install required. Connect loads sample
+        Riverside Coffee Co. reviews.
+      </p>
       <section class="panel">
         <h2>Who we are</h2>
         <p>

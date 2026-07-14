@@ -2,11 +2,15 @@
 
 # dependencies
 node_modules/
+# Exported web build includes font paths under node_modules/
+!docs/app/
+!docs/app/**
 
 # Expo
 .expo/
 dist/
 web-build/
+dist-web/
 expo-env.d.ts
 
 # Native

@@ -23,10 +23,14 @@
         "backgroundColor": "#0f172a"
       },
       "edgeToEdgeEnabled": true,
+      "softwareKeyboardLayoutMode": "resize",
       "usesCleartextTraffic": true
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "experiments": {
+      "baseUrl": "/app"
     },
     "plugins": [
       "expo-font"
