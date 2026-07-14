@@ -9,8 +9,6 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-const ACCENT = '#2dd4bf';
-
 /**
  * MotionSites-style segmented Before / After control.
  */
@@ -25,7 +23,7 @@ export function SceneToggle({ value, onChange, left = 'Before', right = 'After' 
   }, [value, t]);
 
   const thumbStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: interpolate(t.value, [0, 1], [2, 78]) }],
+    transform: [{ translateX: interpolate(t.value, [0, 1], [2, 84]) }],
   }));
 
   const leftStyle = useAnimatedStyle(() => ({
@@ -63,12 +61,12 @@ const styles = StyleSheet.create({
   shell: {
     alignSelf: 'center',
     flexDirection: 'row',
-    width: 156,
+    width: 168,
     height: 40,
     borderRadius: 999,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(0,0,0,0.45)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
+    borderColor: 'rgba(255,255,255,0.16)',
     padding: 2,
     position: 'relative',
   },
@@ -76,12 +74,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 2,
     left: 0,
-    width: 74,
+    width: 80,
     height: 34,
     borderRadius: 999,
-    backgroundColor: 'rgba(255,255,255,0.92)',
+    backgroundColor: 'rgba(255,255,255,0.95)',
     shadowColor: '#000',
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.28,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
   },
