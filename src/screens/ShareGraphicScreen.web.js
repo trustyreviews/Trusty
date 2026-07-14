@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   ScrollView,
   Text,
@@ -9,8 +8,6 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import ViewShot from 'react-native-view-shot';
-import * as Sharing from 'expo-sharing';
 import {
   ShareGraphicCard,
   SHARE_GRAPHIC_SIZES,
@@ -18,9 +15,16 @@ import {
 import { useReviews } from '../context/ReviewsContext';
 import { useTheme } from '../context/ThemeContext';
 import { useThemedStyles } from '../hooks/useThemedStyles';
+import {
+  downloadImageFromDataUri,
+  safeFilenamePart,
+} from '../utils/downloadImage';
 import { canShareReview } from '../utils/shareGraphic';
 
-/** Native share screen — uses ViewShot + system share sheet. */
+/**
+ * Web share screen — captures a real DOM node with html2canvas and
+ * downloads a PNG via Blob (ViewShot + scaled previews fail in browsers).
+ */
 export function ShareGraphicScreen({ route, navigation }) {
   const { reviewId } = route.params ?? {};
   const { reviews, business } = useReviews();
@@ -29,7 +33,8 @@ export function ShareGraphicScreen({ route, navigation }) {
   const review = reviews.find((r) => r.id === reviewId);
   const [format, setFormat] = useState('square');
   const [busy, setBusy] = useState(false);
-  const shotRef = useRef(null);
+  const [status, setStatus] = useState(null);
+  const hostRef = useRef(null);
   const { width: windowWidth } = useWindowDimensions();
 
   if (!review || !canShareReview(review)) {
@@ -55,29 +60,42 @@ export function ShareGraphicScreen({ route, navigation }) {
   const previewWidth = Math.min(windowWidth - 48, 340);
   const scale = previewWidth / size.width;
 
-  const saveAndShare = async () => {
+  const fileName = [
+    'trusty',
+    safeFilenamePart(business?.name),
+    format,
+    safeFilenamePart(review.authorName),
+  ]
+    .filter(Boolean)
+    .join('-')
+    .concat('.png');
+
+  const downloadPng = async () => {
     if (busy) return;
     setBusy(true);
+    setStatus(null);
     try {
-      const uri = await shotRef.current.capture();
-      const available = await Sharing.isAvailableAsync();
-      if (!available) {
-        Alert.alert(
-          'Ready',
-          'Sharing isn’t available on this device. The graphic was generated successfully.'
-        );
-        return;
-      }
-      await Sharing.shareAsync(uri, {
-        mimeType: 'image/png',
-        dialogTitle: 'Share review graphic',
-        UTI: 'public.png',
+      const host = hostRef.current;
+      if (!host) throw new Error('Capture target is not ready yet.');
+
+      const html2canvas = (await import('html2canvas')).default;
+      const canvas = await html2canvas(host, {
+        backgroundColor: null,
+        scale: 1,
+        width: size.width,
+        height: size.height,
+        windowWidth: size.width,
+        windowHeight: size.height,
+        useCORS: true,
+        logging: false,
       });
+
+      const dataUri = canvas.toDataURL('image/png');
+      downloadImageFromDataUri(dataUri, fileName);
+      setStatus(`Saved ${fileName} to your Downloads folder.`);
     } catch (err) {
-      Alert.alert(
-        'Couldn’t export',
-        err?.message || 'Something went wrong capturing the graphic.'
-      );
+      console.warn('[ShareGraphic] web download failed', err);
+      setStatus(err?.message || 'Download failed. Try again.');
     } finally {
       setBusy(false);
     }
@@ -85,13 +103,33 @@ export function ShareGraphicScreen({ route, navigation }) {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
+      {/* Full-size offscreen DOM host for html2canvas */}
+      <div
+        ref={hostRef}
+        aria-hidden
+        style={{
+          position: 'fixed',
+          left: -10000,
+          top: 0,
+          width: size.width,
+          height: size.height,
+          pointerEvents: 'none',
+          zIndex: -1,
+        }}
+      >
+        <ShareGraphicCard
+          review={review}
+          businessName={business?.name}
+          format={format}
+        />
+      </div>
+
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.lead}>
-          Preview a branded graphic, then download or share it to Instagram,
-          TikTok, or Messages.
+          Preview a branded graphic, then download the PNG to your computer.
         </Text>
 
         <View style={styles.segment}>
@@ -140,17 +178,11 @@ export function ShareGraphicScreen({ route, navigation }) {
                 ],
               }}
             >
-              <ViewShot
-                ref={shotRef}
-                options={{ format: 'png', quality: 1, result: 'tmpfile' }}
-                style={{ width: size.width, height: size.height }}
-              >
-                <ShareGraphicCard
-                  review={review}
-                  businessName={business?.name}
-                  format={format}
-                />
-              </ViewShot>
+              <ShareGraphicCard
+                review={review}
+                businessName={business?.name}
+                format={format}
+              />
             </View>
           </View>
         </View>
@@ -160,15 +192,17 @@ export function ShareGraphicScreen({ route, navigation }) {
             styles.primaryBtn,
             (pressed || busy) && styles.pressed,
           ]}
-          onPress={saveAndShare}
+          onPress={downloadPng}
           disabled={busy}
         >
           {busy ? (
             <ActivityIndicator color={colors.onAccent} />
           ) : (
-            <Text style={styles.primaryBtnText}>Download / Share</Text>
+            <Text style={styles.primaryBtnText}>Download PNG</Text>
           )}
         </Pressable>
+
+        {status ? <Text style={styles.status}>{status}</Text> : null}
       </ScrollView>
     </SafeAreaView>
   );
@@ -242,6 +276,13 @@ function createStyles(colors, fonts) {
     },
     pressed: {
       opacity: 0.85,
+    },
+    status: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      lineHeight: 18,
+      color: colors.textMuted,
+      textAlign: 'center',
     },
     empty: {
       flex: 1,
