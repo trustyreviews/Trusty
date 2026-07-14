@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Dimensions, Image, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
   Extrapolation,
@@ -14,133 +14,120 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { BusinessMotionBackdrop } from '../components/BusinessMotionBackdrop';
 import { ConnectBusinessButton } from '../components/ConnectBusinessButton';
+import { FuturisticPatternBackdrop } from '../components/FuturisticPatternBackdrop';
+import { HelpingLoop } from '../components/HelpingLoop';
 import { LegalLinks } from '../components/LegalLinks';
 import { useReviews } from '../context/ReviewsContext';
 
+const RESTAURANT = require('../../assets/restaurant-thrive.png');
+const { width: W } = Dimensions.get('window');
+
 const C = {
-  ink: '#faf7f2',
-  muted: 'rgba(250,247,242,0.7)',
-  dim: 'rgba(250,247,242,0.4)',
-  amber: '#ffb020',
-  danger: '#ff4d5e',
-  glass: 'rgba(12,12,14,0.72)',
-  line: 'rgba(255,255,255,0.14)',
+  ink: '#f7f8f5',
+  muted: 'rgba(247,248,245,0.68)',
+  dim: 'rgba(247,248,245,0.4)',
+  accent: '#2dd4bf',
+  glass: 'rgba(12,16,22,0.72)',
+  line: 'rgba(255,255,255,0.12)',
 };
 
 /**
- * Connect screen — booming restaurant photo marquees, centered UI (no clip),
- * shock entrance, floating review hits.
+ * Connect screen — teal futuristic motion field, thriving restaurant graphic,
+ * and a spinning “we help each other” loop. No photo marquees.
  */
 export function OnboardingScreen({ navigation }) {
   const { connectBusiness } = useReviews();
 
   const enter = useSharedValue(0);
-  const punch = useSharedValue(0);
   const float = useSharedValue(0);
 
   useEffect(() => {
-    punch.value = withSequence(
-      withTiming(1, { duration: 140, easing: Easing.out(Easing.quad) }),
-      withTiming(0, { duration: 480, easing: Easing.in(Easing.cubic) })
-    );
     enter.value = withDelay(
-      200,
-      withSpring(1, { damping: 14, stiffness: 90 })
+      80,
+      withSpring(1, { damping: 15, stiffness: 95 })
     );
     float.value = withDelay(
-      900,
+      600,
       withRepeat(
         withSequence(
-          withTiming(1, { duration: 3800, easing: Easing.inOut(Easing.sin) }),
-          withTiming(0, { duration: 3800, easing: Easing.inOut(Easing.sin) })
+          withTiming(1, { duration: 3600, easing: Easing.inOut(Easing.sin) }),
+          withTiming(0, { duration: 3600, easing: Easing.inOut(Easing.sin) })
         ),
         -1,
         false
       )
     );
-  }, [enter, punch, float]);
-
-  const flashStyle = useAnimatedStyle(() => ({
-    opacity: punch.value * 0.85,
-  }));
+  }, [enter, float]);
 
   const heroStyle = useAnimatedStyle(() => ({
     opacity: enter.value,
     transform: [
       {
-        translateY: interpolate(enter.value, [0, 1], [40, 0], Extrapolation.CLAMP),
+        translateY: interpolate(enter.value, [0, 1], [28, 0], Extrapolation.CLAMP),
       },
+    ],
+  }));
+
+  const stageStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(enter.value, [0.1, 1], [0, 1]),
+    transform: [
       {
-        scale: interpolate(enter.value, [0, 1], [0.92, 1], Extrapolation.CLAMP),
+        scale: interpolate(enter.value, [0, 1], [0.94, 1], Extrapolation.CLAMP),
       },
     ],
   }));
 
-  const cardLeftStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(enter.value, [0.35, 1], [0, 1]),
+  const artStyle = useAnimatedStyle(() => ({
     transform: [
-      { translateY: interpolate(float.value, [0, 1], [0, -12]) },
-      { translateX: interpolate(float.value, [0, 1], [0, 6]) },
-      { rotate: `${interpolate(float.value, [0, 1], [-3, 1])}deg` },
+      { translateY: interpolate(float.value, [0, 1], [0, -8]) },
+      { rotate: `${interpolate(float.value, [0, 1], [-1.5, 1.2])}deg` },
     ],
   }));
 
-  const cardRightStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(enter.value, [0.45, 1], [0, 1]),
-    transform: [
-      { translateY: interpolate(float.value, [0, 1], [0, 10]) },
-      { translateX: interpolate(float.value, [0, 1], [0, -5]) },
-      { rotate: `${interpolate(float.value, [0, 1], [2.5, -1])}deg` },
-    ],
-  }));
+  const loopSize = Math.min(W * 0.58, 240);
 
   return (
     <View style={styles.root}>
       <StatusBar style="light" />
-      <BusinessMotionBackdrop />
-
-      <Animated.View pointerEvents="none" style={[styles.flash, flashStyle]} />
+      <FuturisticPatternBackdrop />
 
       <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-        <View style={styles.stage}>
-          <Animated.View style={[styles.card, styles.cardLeft, cardLeftStyle]}>
-            <Text style={styles.badgeHot}>1★ URGENT</Text>
-            <Text style={styles.cardQuote}>
-              “Waited 40 min. Food arrived cold.”
-            </Text>
-            <Text style={styles.cardMeta}>Alex M. · Google</Text>
-          </Animated.View>
+        <Animated.View style={[styles.stage, stageStyle]}>
+          <View style={styles.stageRow}>
+            <Animated.View style={[styles.artWrap, artStyle]}>
+              <Image
+                source={RESTAURANT}
+                style={styles.art}
+                resizeMode="cover"
+                accessibilityLabel="Thriving restaurant graphic"
+              />
+              <View style={styles.artBadge}>
+                <Text style={styles.artBadgeText}>Nights packing out</Text>
+              </View>
+            </Animated.View>
 
-          <Animated.View style={[styles.card, styles.cardRight, cardRightStyle]}>
-            <Text style={styles.badgeWin}>5★ BOOMING</Text>
-            <Text style={styles.cardQuote}>
-              “Best patio brunch in town.”
-            </Text>
-            <Text style={styles.cardMeta}>Maya R. · Google</Text>
-          </Animated.View>
-        </View>
+            <HelpingLoop size={loopSize} />
+          </View>
+        </Animated.View>
 
         <Animated.View style={[styles.hero, heroStyle]}>
-          <Text style={styles.eyebrow}>RESTAURANTS · CAFES · LOCAL LEGENDS</Text>
+          <Text style={styles.eyebrow}>RESTAURANTS & LOCAL SPOTS</Text>
           <Text style={styles.brand} numberOfLines={1} adjustsFontSizeToFit>
             Trusty
           </Text>
           <Text style={styles.headline}>
-            The review inbox for{'\n'}
-            <Text style={styles.headlineAccent}>booming businesses.</Text>
+            Stay on top of{'\n'}
+            <Text style={styles.headlineAccent}>every guest review.</Text>
           </Text>
           <Text style={styles.copy}>
-            Catch every Google review in one place. Reply faster. Turn praise into
-            posts. Protect the nights that pack the house.
+            Guests speak. You reply. Trusty keeps the loop moving — so your
+            restaurant keeps growing.
           </Text>
 
           <ConnectBusinessButton
             label="Connect your business"
             onPress={connectBusiness}
-            accentColor="#ffb020"
-            labelColor="#140c02"
           />
 
           <Text style={styles.hint}>
@@ -156,103 +143,94 @@ export function OnboardingScreen({ navigation }) {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#050505',
-  },
-  flash: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#fff4e5',
-    zIndex: 20,
+    backgroundColor: '#07090d',
   },
   safe: {
     flex: 1,
-    // Keep all copy inset — fixes left-edge “rusty” clipping
-    paddingHorizontal: 28,
+    paddingHorizontal: 24,
   },
   stage: {
     flex: 1,
-    minHeight: 160,
+    minHeight: 200,
     justifyContent: 'center',
+    alignItems: 'center',
   },
-  card: {
-    position: 'absolute',
-    width: '46%',
-    maxWidth: 200,
-    borderRadius: 16,
+  stageRow: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    flexWrap: 'wrap',
+  },
+  artWrap: {
+    width: Math.min(W * 0.34, 150),
+    height: Math.min(W * 0.34, 150),
+    borderRadius: 22,
+    overflow: 'hidden',
     borderWidth: 1,
     borderColor: C.line,
     backgroundColor: C.glass,
-    padding: 12,
   },
-  cardLeft: {
-    left: 0,
-    top: '18%',
+  art: {
+    width: '100%',
+    height: '100%',
   },
-  cardRight: {
-    right: 0,
-    top: '38%',
+  artBadge: {
+    position: 'absolute',
+    left: 8,
+    right: 8,
+    bottom: 8,
+    borderRadius: 999,
+    backgroundColor: 'rgba(7,9,13,0.82)',
+    borderWidth: 1,
+    borderColor: 'rgba(45,212,191,0.4)',
+    paddingVertical: 5,
+    paddingHorizontal: 8,
   },
-  badgeHot: {
-    color: C.danger,
+  artBadgeText: {
+    color: C.accent,
     fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-    marginBottom: 6,
-  },
-  badgeWin: {
-    color: C.amber,
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-    marginBottom: 6,
-  },
-  cardQuote: {
-    color: C.ink,
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: '600',
-  },
-  cardMeta: {
-    marginTop: 8,
-    color: C.dim,
-    fontSize: 11,
+    fontWeight: '700',
+    textAlign: 'center',
+    letterSpacing: 0.3,
   },
   hero: {
-    paddingBottom: 20,
+    paddingBottom: 16,
   },
   eyebrow: {
-    color: C.amber,
+    color: C.accent,
     fontSize: 11,
     fontWeight: '800',
     letterSpacing: 1.6,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   brand: {
     color: C.ink,
-    fontSize: 56,
+    fontSize: 52,
     fontWeight: '900',
-    letterSpacing: -1.4,
-    // Extra inset so first glyph never clips (was showing “rusty”)
+    letterSpacing: -1.2,
     paddingLeft: 2,
     paddingRight: 8,
     includeFontPadding: false,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   headline: {
     color: C.ink,
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: '700',
-    letterSpacing: -0.5,
-    lineHeight: 32,
-    marginBottom: 12,
+    letterSpacing: -0.4,
+    lineHeight: 30,
+    marginBottom: 10,
   },
   headlineAccent: {
-    color: C.amber,
+    color: C.accent,
   },
   copy: {
     color: C.muted,
     fontSize: 15,
-    lineHeight: 23,
-    marginBottom: 24,
+    lineHeight: 22,
+    marginBottom: 22,
     maxWidth: 440,
   },
   hint: {
@@ -262,6 +240,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   legal: {
-    marginTop: 16,
+    marginTop: 14,
   },
 });
