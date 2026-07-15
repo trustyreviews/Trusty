@@ -3,848 +3,1447 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Trusty — Review inbox for local restaurants</title>
+    <title>Trusty — Every Review. One Place.</title>
     <link rel="canonical" href="https://www.trustydirect.com/" />
     <meta
       name="description"
-      content="Trusty is the cinematic review inbox for restaurants. Catch every Google review, reply faster, protect your reputation."
+      content="Trusty brings all your guest feedback from Google, TripAdvisor, Yelp, and more into a single dashboard so your team can respond faster and grow smarter."
     />
     <meta property="og:url" content="https://www.trustydirect.com/" />
-    <meta property="og:title" content="Trusty — Review inbox for local restaurants" />
+    <meta property="og:title" content="Trusty — Every Review. One Place." />
     <meta
       property="og:description"
-      content="Catch every Google review, reply faster, protect your reputation."
+      content="The reputation command center for hospitality teams."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
     <style>
       :root {
-        --bg: #07090d;
-        --text: #f7f8f5;
-        --muted: #9aa3b2;
-        --accent: #2dd4bf;
-        --accent-deep: #0f766e;
-        --amber: #f0a53e;
-        --danger: #fb7185;
-        --glass: rgba(255, 255, 255, 0.06);
-        --glass-border: rgba(255, 255, 255, 0.12);
-        --line: rgba(255, 255, 255, 0.08);
+        font-family: "Manrope", sans-serif;
+        color: #ffffff;
+        background: #0f172a;
+        font-synthesis: none;
       }
-
-      * { box-sizing: border-box; }
-      html { scroll-behavior: smooth; }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+        background: #0f172a;
+      }
       body {
         margin: 0;
+        min-width: 320px;
         min-height: 100vh;
-        font-family: Outfit, system-ui, sans-serif;
-        color: var(--text);
-        background: var(--bg);
-        overflow-x: hidden;
+        background: #0f172a;
       }
-      body.intro-lock { overflow: hidden; }
-      a { color: var(--accent); }
-
-      /* ========== INTRO ========== */
-      .intro {
-        position: fixed;
-        inset: 0;
-        z-index: 2000;
-        background: #05070a;
-        display: grid;
-        place-items: center;
-        overflow: hidden;
+      a {
+        color: inherit;
+        text-decoration: none;
       }
-      .intro.is-done {
-        pointer-events: none;
-        animation: curtainUp 1.1s cubic-bezier(0.65, 0, 0.35, 1) forwards;
-      }
-      @keyframes curtainUp {
-        to {
-          opacity: 0;
-          visibility: hidden;
-          transform: scale(1.06);
-          filter: blur(12px);
-        }
-      }
-
-      .intro-veil {
-        position: absolute;
-        inset: -30%;
-        background:
-          radial-gradient(circle at 50% 40%, rgba(45, 212, 191, 0.22), transparent 42%),
-          radial-gradient(circle at 20% 80%, rgba(240, 165, 62, 0.12), transparent 40%),
-          radial-gradient(circle at 85% 20%, rgba(56, 189, 248, 0.1), transparent 35%);
-        animation: veilPulse 6s ease-in-out infinite alternate;
-      }
-      @keyframes veilPulse {
-        from { transform: scale(1) translate3d(-1%, 0, 0); }
-        to { transform: scale(1.08) translate3d(1%, 2%, 0); }
-      }
-
-      .intro-orb {
-        position: absolute;
-        width: min(46vw, 420px);
-        height: min(46vw, 420px);
-        border-radius: 50%;
-        background:
-          radial-gradient(circle at 35% 30%, rgba(255,255,255,0.35), transparent 28%),
-          radial-gradient(circle at 50% 50%, rgba(45, 212, 191, 0.55), rgba(15, 118, 110, 0.15) 55%, transparent 70%);
-        filter: blur(2px);
-        opacity: 0;
-        transform: scale(0.7);
-      }
-      .intro.is-playing .intro-orb {
-        animation: orbIn 2.2s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
-      }
-      @keyframes orbIn {
-        to { opacity: 1; transform: scale(1); }
-      }
-
-      .intro-copy {
-        position: relative;
-        z-index: 2;
-        text-align: center;
-        padding: 1.5rem;
-      }
-      .intro-word {
-        overflow: hidden;
-        margin: 0;
-      }
-      .intro-word span {
-        display: block;
-        font-family: "Instrument Serif", Georgia, serif;
-        font-size: clamp(2.8rem, 9vw, 6.5rem);
-        font-weight: 400;
-        letter-spacing: -0.03em;
-        line-height: 0.95;
-        transform: translateY(110%);
-      }
-      .intro.is-playing .intro-word span {
-        animation: rise 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      }
-      .intro.is-playing .intro-word:nth-child(1) span { animation-delay: 0.55s; }
-      .intro.is-playing .intro-word:nth-child(2) span { animation-delay: 0.78s; color: var(--accent); }
-      @keyframes rise {
-        to { transform: translateY(0); }
-      }
-
-      .intro-word:nth-child(2) span { color: var(--accent); }
-
-      .intro-sub {
-        margin: 1.4rem auto 0;
-        max-width: 28rem;
-        color: var(--muted);
-        font-size: clamp(0.95rem, 2vw, 1.1rem);
-        line-height: 1.5;
-        opacity: 0;
-        transform: translateY(12px);
-      }
-      .intro.is-playing .intro-sub {
-        animation: fadeUp 0.9s ease 1.35s forwards;
-      }
-      @keyframes fadeUp {
-        to { opacity: 1; transform: translateY(0); }
-      }
-
-      .intro-skip {
-        position: absolute;
-        top: 1.25rem;
-        right: 1.25rem;
-        z-index: 3;
-        border: 1px solid var(--glass-border);
-        background: rgba(7, 9, 13, 0.45);
-        color: var(--muted);
+      button,
+      input {
         font: inherit;
-        font-size: 0.82rem;
-        font-weight: 600;
-        letter-spacing: 0.04em;
-        padding: 0.55rem 0.95rem;
-        border-radius: 999px;
-        cursor: pointer;
-        backdrop-filter: blur(12px);
-      }
-      .intro-skip:hover { color: var(--text); }
-
-      .intro.is-replaying {
-        animation: none;
-        opacity: 1;
-        visibility: visible;
-        transform: none;
-        filter: none;
-        pointer-events: auto;
       }
 
-      /* ========== SITE ========== */
-      .site {
-        opacity: 0;
-        transition: opacity 0.8s ease 0.15s;
-      }
-      .site.is-ready { opacity: 1; }
-
-      .hero {
-        position: relative;
-        min-height: 100svh;
+      .horizon-page {
+        min-height: 100vh;
         overflow: hidden;
-        display: flex;
-        flex-direction: column;
+        background: #0f172a;
+        color: #ffffff;
       }
-
-      .hero-stage {
-        position: absolute;
-        inset: 0;
-        z-index: 0;
-        perspective: 1200px;
-      }
-
-      .hero-bg {
-        position: absolute;
-        inset: 0;
-        background:
-          radial-gradient(ellipse 80% 60% at 70% 30%, rgba(45, 212, 191, 0.16), transparent 55%),
-          radial-gradient(ellipse 55% 45% at 15% 75%, rgba(240, 165, 62, 0.1), transparent 50%),
-          radial-gradient(ellipse 40% 35% at 90% 80%, rgba(56, 189, 248, 0.08), transparent 45%),
-          linear-gradient(180deg, #0b1018 0%, #07090d 70%);
-      }
-
-      .light-trail {
-        position: absolute;
-        width: 140%;
-        height: 2px;
-        left: -20%;
-        top: 38%;
-        background: linear-gradient(90deg, transparent, rgba(45, 212, 191, 0.55), transparent);
-        filter: blur(1px);
-        opacity: 0.55;
-        animation: trail 7s ease-in-out infinite;
-        transform: rotate(-12deg);
-      }
-      .light-trail.b {
-        top: 62%;
-        animation-delay: -2.5s;
-        opacity: 0.3;
-        transform: rotate(8deg);
-      }
-      @keyframes trail {
-        0%, 100% { transform: translateX(-8%) rotate(-12deg); opacity: 0.2; }
-        50% { transform: translateX(8%) rotate(-12deg); opacity: 0.7; }
-      }
-
-      .sphere {
-        position: absolute;
-        width: min(58vw, 560px);
-        height: min(58vw, 560px);
-        right: -6%;
-        top: 8%;
-        border-radius: 50%;
-        background:
-          radial-gradient(circle at 32% 28%, rgba(255,255,255,0.45), transparent 22%),
-          radial-gradient(circle at 55% 45%, rgba(45, 212, 191, 0.5), rgba(7, 9, 13, 0.2) 58%, transparent 72%);
-        filter: blur(0.5px);
-        animation: sphereFloat 10s ease-in-out infinite;
-        will-change: transform;
-      }
-      .sphere::after {
-        content: "";
-        position: absolute;
-        inset: 12%;
-        border-radius: 50%;
-        border: 1px solid rgba(255,255,255,0.1);
-        animation: spin 24s linear infinite;
-      }
-      @keyframes sphereFloat {
-        0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-        50% { transform: translate3d(-18px, 22px, 0) scale(1.04); }
-      }
-      @keyframes spin { to { transform: rotate(360deg); } }
-
-      .parallax-layer {
-        position: absolute;
-        inset: 0;
-        transition: transform 0.35s ease-out;
-        will-change: transform;
-      }
-
-      header {
+      .section-shell {
         position: relative;
-        z-index: 5;
-        width: min(1120px, calc(100% - 2.5rem));
+        width: min(1240px, calc(100% - 80px));
         margin: 0 auto;
-        padding: 1.35rem 0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
       }
-      .logo {
-        font-size: 1.35rem;
+      .site-nav {
+        position: fixed;
+        z-index: 20;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 76px;
+        padding: 0 5vw;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: background 0.35s, border-color 0.35s, backdrop-filter 0.35s;
+        border-bottom: 1px solid transparent;
+      }
+      .site-nav-scrolled {
+        background: rgba(15, 23, 42, 0.78);
+        border-color: rgba(255, 255, 255, 0.09);
+        backdrop-filter: blur(18px);
+      }
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        font-size: 17px;
         font-weight: 800;
         letter-spacing: -0.04em;
-        text-decoration: none;
-        color: var(--text);
       }
-      .logo-wrap { display: flex; flex-direction: column; gap: 0.05rem; }
-      .domain {
-        font-size: 0.68rem;
-        font-weight: 600;
-        color: var(--muted);
+      .brand-dot {
+        color: #10b981;
+      }
+      .brand-mark {
+        width: 24px;
+        height: 24px;
+        display: inline-grid;
+        place-items: center;
+        color: #0f172a;
+        background: #10b981;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 50%;
+        box-shadow: 0 0 26px rgba(16, 185, 129, 0.35);
+      }
+      .brand-mark.small {
+        width: 18px;
+        height: 18px;
+        transform: none;
+        margin-left: 0;
+        box-shadow: 0 0 18px rgba(16, 185, 129, 0.25);
+      }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 34px;
+        color: #cbd5e1;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .nav-links a {
+        transition: color 0.2s, border-color 0.2s, background 0.2s;
+      }
+      .nav-links a:hover {
+        color: #ffffff;
+      }
+      .nav-cta {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: #ffffff !important;
+        background: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.7);
+        border-radius: 999px;
+        padding: 11px 16px;
+        box-shadow: 0 12px 36px rgba(16, 185, 129, 0.18);
+      }
+      .nav-cta:hover {
+        background: #059669;
+        border-color: #10b981;
+      }
+      .menu-toggle {
+        display: none;
+        color: #ffffff;
+        background: none;
+        border: 0;
+        cursor: pointer;
+      }
+      .hero {
+        min-height: 100vh;
+        padding: 180px 0 64px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        isolation: isolate;
+      }
+      .hero-grid {
+        position: absolute;
+        inset: 0;
+        z-index: -3;
+        opacity: 0.18;
+        background-image: linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+        background-size: 72px 72px;
+        mask-image: linear-gradient(to bottom, transparent, black 20%, black 65%, transparent);
+      }
+      .hero:before {
+        content: "";
+        position: absolute;
+        z-index: -4;
+        inset: 0 -100vw;
+        background: radial-gradient(circle at 72% 42%, rgba(16, 185, 129, 0.24), transparent 28%),
+          radial-gradient(circle at 44% 70%, rgba(245, 158, 11, 0.1), transparent 26%);
+      }
+      .orb {
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+      }
+      .orb-large {
+        z-index: -2;
+        width: 430px;
+        height: 430px;
+        right: 8%;
+        top: 25%;
+        background: radial-gradient(
+          circle at 32% 25%,
+          #d1fae5 0 2%,
+          #10b981 13%,
+          #047857 38%,
+          #052e2b 66%,
+          transparent 70%
+        );
+        filter: blur(0.3px);
+        box-shadow: -40px 40px 120px rgba(16, 185, 129, 0.38), 28px -25px 90px rgba(245, 158, 11, 0.16);
+        animation: float 8s ease-in-out infinite;
+      }
+      .orb-small {
+        z-index: -1;
+        right: 34%;
+        top: 20%;
+        width: 50px;
+        height: 50px;
+        background: #f59e0b;
+        filter: blur(10px);
+        box-shadow: 0 0 50px 20px rgba(245, 158, 11, 0.22);
+        animation: drift 6s ease-in-out infinite;
+      }
+      .particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: #a7f3d0;
+        box-shadow: 0 0 14px #10b981;
+      }
+      .particle-one {
+        right: 25%;
+        top: 37%;
+      }
+      .particle-two {
+        right: 10%;
+        bottom: 25%;
+        background: #f59e0b;
+        box-shadow: 0 0 14px #f59e0b;
+      }
+      .hero-copy {
+        max-width: 760px;
+      }
+      .eyebrow {
+        color: #cbd5e1;
+        text-transform: uppercase;
+        letter-spacing: 0.17em;
+        font-family: "DM Mono", monospace;
+        font-size: 10px;
+        line-height: 1.5;
+        margin: 0 0 28px;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+      }
+      .eyebrow-line {
+        display: inline-block;
+        flex: 0 0 auto;
+        width: 28px;
+        height: 1px;
+        background: #10b981;
+        box-shadow: 0 0 8px #10b981;
+      }
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+      h1 {
+        font-size: clamp(64px, 9.2vw, 142px);
+        line-height: 0.88;
+        letter-spacing: -0.085em;
+        margin-bottom: 34px;
+        font-weight: 800;
+      }
+      .hero h1 {
+        background: linear-gradient(110deg, #ffffff 8%, #d1fae5 42%, #10b981 92%);
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+      }
+      .hero h1 em,
+      h2 em {
+        font-style: normal;
+        font-weight: 500;
+      }
+      .hero-intro {
+        color: #cbd5e1;
+        font-size: 15px;
+        line-height: 1.75;
+        max-width: 560px;
+        margin-bottom: 32px;
+      }
+      .hero-actions {
+        display: flex;
+        align-items: center;
+        gap: 23px;
+      }
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        border-radius: 999px;
+        padding: 14px 20px;
+        font-size: 12px;
+        font-weight: 800;
+        transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+        cursor: pointer;
+        border: 0;
+      }
+      .button:hover {
+        transform: translateY(-2px);
+      }
+      .button-primary {
+        color: #ffffff;
+        background: #10b981;
+        box-shadow: 0 8px 30px rgba(16, 185, 129, 0.24);
+      }
+      .button-primary:hover {
+        background: #059669;
+        box-shadow: 0 12px 40px rgba(16, 185, 129, 0.28);
+      }
+      .button-quiet {
+        color: #e2e8f0;
+        padding-left: 0;
+      }
+      .play-icon {
+        width: 27px;
+        height: 27px;
+        display: grid;
+        place-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        border-radius: 50%;
+        color: #10b981;
+      }
+      .hero-footer {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        color: #94a3b8;
+        font-family: "DM Mono", monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.13em;
+        font-size: 9px;
+      }
+      .scroll-line {
+        width: 55px;
+        height: 1px;
+        background: linear-gradient(90deg, #10b981, transparent);
+      }
+      .hero-index {
+        margin-left: auto;
+        color: #64748b;
+      }
+      .features {
+        padding: 150px 0 160px;
+      }
+      .section-heading {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr 0.8fr;
+        align-items: end;
+        gap: 40px;
+        margin-bottom: 70px;
+      }
+      .section-heading .eyebrow {
+        align-self: start;
+      }
+      .section-heading h2,
+      .spotlight h2,
+      .stories h2,
+      .closing h2 {
+        font-size: clamp(48px, 6vw, 86px);
+        line-height: 0.92;
+        letter-spacing: -0.075em;
+        margin: 0;
+        font-weight: 700;
+      }
+      .section-heading h2 em,
+      .spotlight h2 em,
+      .stories h2 em {
+        color: #10b981;
+      }
+      .section-note {
+        color: #94a3b8;
+        font-size: 13px;
+        line-height: 1.7;
+        max-width: 260px;
+        margin: 0;
+      }
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+      }
+      .feature-card {
+        min-height: 268px;
+        padding: 27px;
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.025));
+        border: 1px solid rgba(255, 255, 255, 0.11);
+        border-radius: 10px;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.3s, border-color 0.3s, background 0.3s;
+      }
+      .feature-card:hover {
+        transform: translateY(-6px);
+        border-color: rgba(16, 185, 129, 0.62);
+        background: linear-gradient(145deg, rgba(16, 185, 129, 0.11), rgba(255, 255, 255, 0.025));
+      }
+      .feature-card:before {
+        content: "";
+        position: absolute;
+        width: 140px;
+        height: 140px;
+        top: -80px;
+        right: -50px;
+        background: #10b981;
+        opacity: 0.18;
+        filter: blur(50px);
+      }
+      .card-top {
+        display: flex;
+        justify-content: space-between;
+        color: #a7f3d0;
+      }
+      .feature-number {
+        color: #94a3b8;
+        font: 10px "DM Mono", monospace;
+      }
+      .feature-icon {
+        position: relative;
+        z-index: 1;
+        color: #10b981;
+      }
+      .feature-card h3 {
+        font-size: 20px;
+        letter-spacing: -0.045em;
+        margin: auto 0 9px;
+      }
+      .feature-card p {
+        color: #cbd5e1;
+        font-size: 13px;
+        line-height: 1.6;
+        max-width: 270px;
+        margin: 0 0 18px;
+      }
+      .feature-card a {
+        color: #f59e0b;
+        width: fit-content;
+      }
+      .marquee-wrap {
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+        padding: 20px 0;
+        background: #111c33;
+      }
+      .marquee-track {
+        display: flex;
+        gap: 12px;
+        width: max-content;
+        animation: marquee 28s linear infinite;
+      }
+      .logo-pill {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 999px;
+        padding: 9px 18px;
+        color: #cbd5e1;
+        font: 11px "DM Mono", monospace;
+        letter-spacing: 0.14em;
+      }
+      .logo-spark {
+        color: #f59e0b;
+        font-size: 15px;
+      }
+      .spotlight {
+        min-height: 740px;
+        padding: 170px 0;
+        display: grid;
+        grid-template-columns: 0.85fr 1.15fr;
+        align-items: center;
+        gap: 60px;
+      }
+      .spotlight-copy > p:not(.eyebrow) {
+        color: #cbd5e1;
+        max-width: 385px;
+        font-size: 15px;
+        line-height: 1.8;
+        margin: 32px 0;
+      }
+      .text-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        color: #10b981;
+        font-size: 12px;
+        font-weight: 800;
+      }
+      .product-stage {
+        min-height: 520px;
+        position: relative;
+        display: grid;
+        place-items: center;
+      }
+      .stage-glow {
+        width: 310px;
+        height: 310px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.5), rgba(245, 158, 11, 0.14) 42%, transparent 70%);
+        filter: blur(12px);
+      }
+      .orbit {
+        position: absolute;
+        border: 1px solid rgba(16, 185, 129, 0.34);
+        border-radius: 50%;
+        transform: rotate(-25deg);
+      }
+      .orbit-a {
+        width: 530px;
+        height: 180px;
+      }
+      .orbit-b {
+        width: 490px;
+        height: 270px;
+        transform: rotate(42deg);
+        border-color: rgba(245, 158, 11, 0.25);
+      }
+      .stage-panel {
+        position: absolute;
+        width: 330px;
+        min-height: 430px;
+        padding: 22px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 14px;
+        background: linear-gradient(150deg, rgba(20, 32, 56, 0.94), rgba(5, 33, 35, 0.9));
+        box-shadow: -25px 35px 90px rgba(0, 0, 0, 0.55), inset 0 1px rgba(255, 255, 255, 0.16);
+        transform: rotate(5deg);
+      }
+      .panel-top,
+      .panel-bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: #cbd5e1;
+        font: 9px "DM Mono", monospace;
+      }
+      .mini-brand {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: #ffffff;
+        font-family: Manrope, sans-serif;
+        font-size: 12px;
+        font-weight: 800;
+      }
+      .inbox-summary {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        margin: 26px 0 16px;
+      }
+      .panel-kicker {
+        color: #10b981;
+        font: 9px "DM Mono", monospace;
+        letter-spacing: 0.15em;
+      }
+      .inbox-summary strong {
+        display: flex;
+        align-items: baseline;
+        gap: 7px;
+        font-size: 50px;
+        line-height: 0.9;
+        letter-spacing: -0.08em;
+      }
+      .inbox-summary small {
+        color: #f59e0b;
+        font-size: 12px;
+        font-family: "DM Mono", monospace;
         letter-spacing: 0.06em;
         text-transform: uppercase;
       }
-      nav a {
-        margin-left: 1.2rem;
-        text-decoration: none;
-        color: var(--muted);
-        font-weight: 600;
-        font-size: 0.9rem;
-      }
-      nav a:hover { color: var(--text); }
-      .replay-link {
-        margin-left: 1.2rem;
-        border: 0;
-        background: transparent;
-        color: var(--muted);
-        font: inherit;
-        font-weight: 600;
-        font-size: 0.9rem;
-        cursor: pointer;
-        padding: 0;
-      }
-      .replay-link:hover { color: var(--text); }
-
-      .hero-main {
-        position: relative;
-        z-index: 4;
-        flex: 1;
-        width: min(1120px, calc(100% - 2.5rem));
-        margin: 0 auto;
+      .review-list {
         display: grid;
-        grid-template-columns: 1.15fr 0.85fr;
-        gap: 2rem;
-        align-items: end;
-        padding: 2rem 0 4.5rem;
+        gap: 10px;
       }
-
-      @media (max-width: 900px) {
-        .hero-main {
-          grid-template-columns: 1fr;
-          align-items: start;
-          padding-top: 1rem;
-          padding-bottom: 3rem;
-        }
-        .sphere { top: -4%; right: -20%; opacity: 0.7; }
-        .ui-stack { min-height: 280px; }
+      .review-card {
+        padding: 13px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.055);
+        backdrop-filter: blur(16px);
       }
-
-      .eyebrow {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.55rem;
-        font-size: 0.78rem;
-        font-weight: 700;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-        color: var(--accent);
-        margin-bottom: 1.1rem;
-        opacity: 0;
-        animation: fadeUp 0.8s ease 0.2s forwards;
-      }
-      .eyebrow i {
-        width: 1.5rem;
-        height: 1px;
-        background: var(--accent);
-        display: inline-block;
-      }
-
-      .hero-title {
-        margin: 0;
-        font-family: "Instrument Serif", Georgia, serif;
-        font-size: clamp(3.4rem, 9.5vw, 7.2rem);
-        font-weight: 400;
-        letter-spacing: -0.035em;
-        line-height: 0.92;
-        max-width: 9ch;
-      }
-      .hero-title .line {
-        display: block;
-        overflow: hidden;
-      }
-      .hero-title .line span {
-        display: block;
-        transform: translateY(105%);
-        animation: rise 1.05s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      }
-      .hero-title .line:nth-child(1) span { animation-delay: 0.25s; }
-      .hero-title .line:nth-child(2) span { animation-delay: 0.4s; }
-      .hero-title .line:nth-child(3) span {
-        animation-delay: 0.55s;
-        color: var(--accent);
-        font-style: italic;
-      }
-
-      .hero-sub {
-        margin: 1.35rem 0 0;
-        max-width: 32rem;
-        color: var(--muted);
-        font-size: clamp(1rem, 2vw, 1.15rem);
-        line-height: 1.55;
-        opacity: 0;
-        animation: fadeUp 0.9s ease 0.75s forwards;
-      }
-
-      .cta-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.8rem;
-        margin-top: 2rem;
-        opacity: 0;
-        animation: fadeUp 0.9s ease 0.95s forwards;
-      }
-      .cta {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.55rem;
-        background: var(--text);
-        color: #081018;
-        text-decoration: none;
-        font-weight: 800;
-        font-size: 0.95rem;
-        padding: 0.95rem 1.35rem;
-        border-radius: 999px;
-        transition: transform 0.25s ease, background 0.25s ease;
-      }
-      .cta:hover { transform: translateY(-2px); background: #fff; }
-      .cta-ghost {
-        display: inline-flex;
-        align-items: center;
-        text-decoration: none;
-        color: var(--text);
-        font-weight: 600;
-        font-size: 0.95rem;
-        padding: 0.95rem 1.2rem;
-        border-radius: 999px;
-        border: 1px solid var(--glass-border);
-        background: var(--glass);
-        backdrop-filter: blur(10px);
-      }
-      .cta-ghost:hover { border-color: rgba(255,255,255,0.28); }
-
-      /* Floating glass review UI — MotionSites product-overlay vibe */
-      .ui-stack {
-        position: relative;
-        min-height: 420px;
-        opacity: 0;
-        animation: fadeUp 1s ease 0.55s forwards;
-      }
-
-      .glass {
-        position: absolute;
-        border-radius: 1.25rem;
-        border: 1px solid var(--glass-border);
-        background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
-        backdrop-filter: blur(18px) saturate(140%);
-        box-shadow:
-          0 30px 80px rgba(0,0,0,0.45),
-          inset 0 1px 0 rgba(255,255,255,0.12);
-        padding: 1.15rem 1.2rem;
-      }
-
-      .glass.main {
-        width: min(340px, 100%);
-        right: 0;
-        top: 12%;
-        animation: floatA 6.5s ease-in-out infinite;
-      }
-      .glass.side {
-        width: min(250px, 78%);
-        left: 0;
-        bottom: 8%;
-        animation: floatB 7.5s ease-in-out infinite;
-      }
-      .glass.chip {
-        width: auto;
-        right: 8%;
-        bottom: 28%;
-        padding: 0.65rem 0.9rem;
+      .review-card-top {
         display: flex;
         align-items: center;
-        gap: 0.55rem;
-        font-size: 0.82rem;
-        font-weight: 700;
-        animation: floatC 5.8s ease-in-out infinite;
-      }
-      @keyframes floatA {
-        0%, 100% { transform: translate3d(0, 0, 0) rotate(-1deg); }
-        50% { transform: translate3d(-8px, -14px, 0) rotate(1deg); }
-      }
-      @keyframes floatB {
-        0%, 100% { transform: translate3d(0, 0, 0) rotate(1.5deg); }
-        50% { transform: translate3d(10px, 12px, 0) rotate(-1deg); }
-      }
-      @keyframes floatC {
-        0%, 100% { transform: translate3d(0, 0, 0); }
-        50% { transform: translate3d(-6px, -10px, 0); }
-      }
-
-      .g-top {
-        display: flex;
         justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.7rem;
-      }
-      .g-name { font-weight: 700; }
-      .g-badge {
-        font-size: 0.68rem;
-        font-weight: 800;
+        color: #94a3b8;
+        font: 9px "DM Mono", monospace;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: var(--danger);
-        background: rgba(251, 113, 133, 0.14);
-        padding: 0.3rem 0.55rem;
+      }
+      .rating-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        color: #f59e0b;
+      }
+      .review-card p {
+        margin: 10px 0 12px;
+        color: #dbeafe;
+        font-size: 11px;
+        line-height: 1.45;
+      }
+      .review-card p strong {
+        display: block;
+        color: #ffffff;
+        font-size: 12px;
+        margin-bottom: 4px;
+      }
+      .review-card p span {
+        display: block;
+      }
+      .reply-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 27px;
+        padding: 0 11px;
+        border: 1px solid rgba(16, 185, 129, 0.42);
         border-radius: 999px;
+        color: #d1fae5;
+        background: rgba(16, 185, 129, 0.12);
+        font-size: 10px;
+        font-weight: 800;
+        cursor: pointer;
       }
-      .g-badge.ok {
-        color: var(--accent);
-        background: rgba(45, 212, 191, 0.14);
+      .panel-bottom {
+        position: absolute;
+        left: 22px;
+        right: 22px;
+        bottom: 18px;
       }
-      .g-stars { color: var(--amber); letter-spacing: 0.08em; margin-bottom: 0.55rem; }
-      .g-text { margin: 0; color: var(--muted); line-height: 1.45; font-size: 0.92rem; }
-      .g-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--accent);
-        box-shadow: 0 0 12px rgba(45, 212, 191, 0.8);
+      .panel-bottom strong {
+        color: #10b981;
+        font-size: 12px;
       }
-
-      /* Story strip below hero */
-      .story {
-        position: relative;
-        z-index: 2;
-        width: min(1120px, calc(100% - 2.5rem));
-        margin: 0 auto;
-        padding: 1rem 0 5rem;
+      .stage-label {
+        position: absolute;
+        color: #94a3b8;
+        font: 9px "DM Mono", monospace;
+        letter-spacing: 0.12em;
+      }
+      .label-one {
+        left: 2%;
+        top: 16%;
+      }
+      .label-two {
+        right: 0;
+        bottom: 17%;
+      }
+      .stats-section {
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        background: linear-gradient(105deg, #111827, #0f172a 52%, #052e2b);
+      }
+      .stats-inner {
+        width: min(1240px, calc(100% - 80px));
+        margin: auto;
+        padding: 88px 0;
+      }
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 30px;
+      }
+      .stat strong {
+        display: block;
+        font-size: clamp(38px, 5vw, 66px);
+        letter-spacing: -0.08em;
+        line-height: 1;
+        background: linear-gradient(100deg, #ffffff, #a7f3d0);
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+      }
+      .stat span {
+        color: #cbd5e1;
+        display: block;
+        margin-top: 12px;
+        font: 10px "DM Mono", monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.11em;
+      }
+      .stories {
+        padding: 160px 0 170px;
+      }
+      .stories-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        margin-bottom: 65px;
+        gap: 48px;
+      }
+      .stories-heading > p {
+        color: #94a3b8;
+        line-height: 1.7;
+        font-size: 13px;
+        max-width: 360px;
+      }
+      .testimonial-row {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 1rem;
+        gap: 14px;
+      }
+      .testimonial {
+        min-height: 270px;
+        padding: 26px;
+        position: relative;
+        background: rgba(255, 255, 255, 0.045);
+        border: 1px solid rgba(255, 255, 255, 0.11);
+        border-radius: 10px;
+      }
+      .testimonial-meta {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+      }
+      .avatar {
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        font: 10px "DM Mono", monospace;
+        color: #0f172a;
+        background: linear-gradient(135deg, #10b981, #f59e0b);
+      }
+      .testimonial-meta strong,
+      .testimonial-meta small {
+        display: block;
+      }
+      .testimonial-meta strong {
+        font-size: 12px;
+      }
+      .testimonial-meta small {
+        color: #94a3b8;
+        font-size: 10px;
+        margin-top: 3px;
+      }
+      .testimonial blockquote {
+        margin: 38px 0 0;
+        max-width: 300px;
+        color: #e2e8f0;
+        font-size: 14px;
+        line-height: 1.65;
+      }
+      .quote-mark {
+        position: absolute;
+        color: #10b981;
+        right: 25px;
+        bottom: 8px;
+        font-size: 62px;
+        line-height: 1;
+        opacity: 0.5;
+      }
+      .closing {
+        min-height: 800px;
+        padding: 170px 0 36px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        isolation: isolate;
+      }
+      .closing:before {
+        content: "";
+        position: absolute;
+        z-index: -2;
+        width: 680px;
+        height: 500px;
+        top: 70px;
+        background: radial-gradient(ellipse, rgba(16, 185, 129, 0.22), transparent 62%);
+        filter: blur(20px);
+      }
+      .closing-glow {
+        position: absolute;
+        z-index: -1;
+        width: 1px;
+        height: 240px;
+        top: 0;
+        background: linear-gradient(transparent, #10b981, transparent);
+        box-shadow: 0 0 80px 18px rgba(16, 185, 129, 0.23);
+      }
+      .closing h2 {
+        font-size: clamp(55px, 8vw, 112px);
+        background: linear-gradient(105deg, #ffffff, #a7f3d0 58%, #10b981);
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+      }
+      .closing-note {
+        color: #cbd5e1;
+        margin: 24px 0 23px;
+        font-size: 13px;
+      }
+      .subscribe-form {
+        min-height: 49px;
+        width: min(480px, 100%);
+        display: flex;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 999px;
+        padding: 4px;
+        background: rgba(255, 255, 255, 0.04);
+      }
+      .form-fields {
+        display: flex;
+        width: 100%;
+        min-width: 0;
+      }
+      .subscribe-form input {
+        min-width: 0;
+        flex: 1;
+        border: 0;
+        outline: 0;
+        padding: 0 16px;
+        color: #ffffff;
+        background: transparent;
+        font-size: 12px;
+      }
+      .subscribe-form input::placeholder {
+        color: #94a3b8;
+      }
+      .subscribe-form .button {
+        padding: 11px 17px;
+        white-space: nowrap;
+      }
+      .success-message {
+        width: 100%;
+        color: #a7f3d0;
+        font-size: 12px;
+        margin: auto 0;
+      }
+      .site-footer {
+        width: 100%;
+        margin-top: auto;
+        padding-top: 32px;
+        display: grid;
+        grid-template-columns: 1fr 1.3fr 1fr;
+        align-items: center;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        color: #94a3b8;
+        text-align: left;
+      }
+      .footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 21px;
+        font-size: 11px;
+        flex-wrap: wrap;
+      }
+      .footer-links a:hover {
+        color: #ffffff;
+      }
+      .copyright {
+        text-align: right;
+        font: 10px "DM Mono", monospace;
+      }
+      @keyframes float {
+        0%,
+        100% {
+          transform: translate3d(0, 0, 0) scale(1);
+        }
+        50% {
+          transform: translate3d(-14px, 18px, 0) scale(1.04);
+        }
+      }
+      @keyframes drift {
+        0%,
+        100% {
+          transform: translate(0, 0);
+        }
+        50% {
+          transform: translate(25px, -18px);
+        }
+      }
+      @keyframes marquee {
+        to {
+          transform: translateX(-50%);
+        }
       }
       @media (max-width: 800px) {
-        .story { grid-template-columns: 1fr; }
-      }
-      .story-card {
-        border: 1px solid var(--line);
-        border-radius: 1.25rem;
-        padding: 1.5rem 1.4rem;
-        background: rgba(255,255,255,0.02);
-        min-height: 170px;
-        opacity: 0;
-        transform: translateY(24px);
-        transition: opacity 0.8s ease, transform 0.8s ease;
-      }
-      .story-card.is-in {
-        opacity: 1;
-        transform: translateY(0);
-      }
-      .story-card h2 {
-        margin: 0 0 0.65rem;
-        font-family: "Instrument Serif", Georgia, serif;
-        font-size: 1.65rem;
-        font-weight: 400;
-        letter-spacing: -0.02em;
-      }
-      .story-card p {
-        margin: 0;
-        color: var(--muted);
-        line-height: 1.55;
-        font-size: 0.95rem;
-      }
-      .story-num {
-        font-size: 0.72rem;
-        font-weight: 700;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: var(--accent);
-        margin-bottom: 0.85rem;
-      }
-
-      .panel-wrap {
-        width: min(1120px, calc(100% - 2.5rem));
-        margin: 0 auto 3rem;
-        display: grid;
-        gap: 1rem;
-      }
-      .panel {
-        border-top: 1px solid var(--line);
-        padding-top: 1.5rem;
-      }
-      .panel h2 {
-        margin: 0 0 0.55rem;
-        font-size: 1.05rem;
-      }
-      .panel p {
-        margin: 0;
-        color: var(--muted);
-        line-height: 1.6;
-        max-width: 46rem;
-      }
-
-      footer {
-        width: min(1120px, calc(100% - 2.5rem));
-        margin: 0 auto;
-        padding: 1.5rem 0 2.5rem;
-        border-top: 1px solid var(--line);
-        color: var(--muted);
-        font-size: 0.88rem;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.75rem 1.25rem;
-        justify-content: space-between;
-      }
-      footer a {
-        text-decoration: none;
-        color: var(--muted);
-        font-weight: 600;
-      }
-      footer a:hover { color: var(--text); }
-
-      @media (prefers-reduced-motion: reduce) {
-        .intro { display: none !important; }
-        .site { opacity: 1 !important; }
-        .hero-title .line span,
-        .eyebrow,
-        .hero-sub,
-        .cta-row,
-        .ui-stack,
-        .intro-word span,
-        .intro-sub,
-        .intro-orb,
-        .sphere,
-        .light-trail,
-        .glass.main,
-        .glass.side,
-        .glass.chip {
-          animation: none !important;
-          opacity: 1 !important;
-          transform: none !important;
+        .section-shell,
+        .stats-inner {
+          width: min(100% - 40px, 600px);
         }
-        body.intro-lock { overflow: auto; }
+        .site-nav {
+          padding: 0 20px;
+        }
+        .menu-toggle {
+          display: block;
+        }
+        .nav-links {
+          display: none;
+          position: absolute;
+          top: 70px;
+          left: 20px;
+          right: 20px;
+          padding: 20px;
+          flex-direction: column;
+          align-items: stretch;
+          gap: 20px;
+          background: rgba(15, 23, 42, 0.96);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 12px;
+        }
+        .nav-links-open {
+          display: flex;
+        }
+        .nav-cta {
+          justify-content: center;
+        }
+        .hero {
+          padding-top: 145px;
+        }
+        .orb-large {
+          width: 270px;
+          height: 270px;
+          right: -35px;
+          top: 25%;
+          opacity: 0.75;
+        }
+        .section-heading {
+          display: block;
+        }
+        .section-heading h2 {
+          margin: 50px 0 25px;
+        }
+        .feature-grid,
+        .testimonial-row {
+          grid-template-columns: 1fr;
+        }
+        .feature-card {
+          min-height: 230px;
+        }
+        .features,
+        .stories {
+          padding: 100px 0;
+        }
+        .spotlight {
+          min-height: auto;
+          padding: 110px 0;
+          grid-template-columns: 1fr;
+          gap: 55px;
+        }
+        .product-stage {
+          min-height: 460px;
+          transform: scale(0.86);
+          margin: -30px 0;
+        }
+        .stats-inner {
+          padding: 70px 0;
+        }
+        .stats-grid {
+          grid-template-columns: repeat(2, 1fr);
+          row-gap: 42px;
+        }
+        .stories-heading {
+          display: block;
+        }
+        .stories-heading > p {
+          margin-top: 28px;
+        }
+        .site-footer {
+          grid-template-columns: 1fr;
+          gap: 22px;
+        }
+        .footer-links {
+          justify-content: flex-start;
+          flex-wrap: wrap;
+        }
+        .copyright {
+          text-align: left;
+        }
+        .closing {
+          min-height: 720px;
+        }
+      }
+      @media (max-width: 440px) {
+        h1 {
+          font-size: 56px;
+        }
+        .hero-intro {
+          font-size: 14px;
+        }
+        .hero-actions {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 10px;
+        }
+        .hero-footer {
+          font-size: 8px;
+        }
+        .section-heading h2,
+        .spotlight h2,
+        .stories h2 {
+          font-size: 44px;
+        }
+        .closing h2 {
+          font-size: 52px;
+        }
+        .product-stage {
+          transform: scale(0.67);
+          margin: -75px -82px;
+        }
+        .stats-grid {
+          gap: 28px 12px;
+        }
+        .stat strong {
+          font-size: 38px;
+        }
+        .subscribe-form {
+          border-radius: 8px;
+          flex-direction: column;
+          padding: 0;
+          border: 0;
+          background: transparent;
+          gap: 8px;
+        }
+        .form-fields {
+          flex-direction: column;
+          gap: 8px;
+        }
+        .subscribe-form input {
+          height: 45px;
+          border: 1px solid rgba(255, 255, 255, 0.18);
+          border-radius: 999px;
+        }
+        .subscribe-form .button {
+          width: 100%;
+        }
       }
     </style>
   </head>
-  <body class="intro-lock">
-    <div class="intro is-playing" id="intro" role="dialog" aria-label="Trusty introduction">
-      <div class="intro-veil" aria-hidden="true"></div>
-      <div class="intro-orb" aria-hidden="true"></div>
-      <button type="button" class="intro-skip" id="intro-skip">Skip</button>
-      <div class="intro-copy">
-        <p class="intro-word"><span>Every review</span></p>
-        <p class="intro-word"><span>is a guest.</span></p>
-        <p class="intro-sub">
-          Trusty is the review inbox for restaurants — catch the hard feedback,
-          reply with care, keep the reputation warm.
-        </p>
-      </div>
-    </div>
+  <body>
+    <main class="horizon-page">
+      <nav class="site-nav" id="site-nav" aria-label="Primary navigation">
+        <a href="#top" class="brand" aria-label="Trusty home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </span>
+          <span><span>Trusty</span><span class="brand-dot">.</span></span>
+        </a>
+        <button class="menu-toggle" id="menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+        </button>
+        <div class="nav-links" id="nav-links">
+          <a href="#features"><span>Features</span></a>
+          <a href="#integrations"><span>Integrations</span></a>
+          <a href="#pricing"><span>Pricing</span></a>
+          <a href="#blog"><span>Blog</span></a>
+          <a href="./app/?demo=1" class="nav-cta"><span>Get Started</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+          </a>
+        </div>
+      </nav>
 
-    <div class="site" id="site">
-      <section class="hero">
-        <div class="hero-stage" aria-hidden="true">
-          <div class="hero-bg"></div>
-          <div class="parallax-layer" data-speed="0.02">
-            <div class="light-trail"></div>
-            <div class="light-trail b"></div>
-          </div>
-          <div class="parallax-layer" data-speed="0.06">
-            <div class="sphere"></div>
+      <section class="hero section-shell" id="top">
+        <div class="hero-grid" aria-hidden="true"></div>
+        <div class="orb orb-large" aria-hidden="true"></div>
+        <div class="orb orb-small" aria-hidden="true"></div>
+        <div class="particle particle-one" aria-hidden="true"></div>
+        <div class="particle particle-two" aria-hidden="true"></div>
+        <div class="hero-copy">
+          <p class="eyebrow">
+            <span class="eyebrow-line"></span>
+            <span>The reputation command center for hospitality teams</span>
+          </p>
+          <h1>
+            <span>Every Review.</span><br />
+            <em>One Place.</em>
+          </h1>
+          <p class="hero-intro">
+            <span>
+              Trusty brings all your guest feedback from Google, TripAdvisor, Yelp, and more into a single dashboard so
+              your team can respond faster and grow smarter.
+            </span>
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="./app/?demo=1">
+              <span>Start Free Trial</span>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+            </a>
+            <a class="button button-quiet" href="#spotlight">
+              <span class="play-icon">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+              </span>
+              <span>See How It Works</span>
+            </a>
           </div>
         </div>
+        <div class="hero-footer">
+          <span>Scroll to discover</span>
+          <span class="scroll-line"></span>
+          <span class="hero-index">01 / 07</span>
+        </div>
+      </section>
 
-        <header>
-          <div class="logo-wrap">
-            <a class="logo" href="https://www.trustydirect.com/">Trusty</a>
-            <span class="domain">www.trustydirect.com</span>
+      <section class="features section-shell" id="features">
+        <div class="section-heading">
+          <p class="eyebrow">
+            <span class="eyebrow-line"></span>
+            <span>Everything your reviews need</span>
+          </p>
+          <h2>
+            <span>Stay ahead of</span><br />
+            <em>guest sentiment.</em>
+          </h2>
+          <p class="section-note">
+            <span>
+              Trusty turns scattered feedback into a daily operating rhythm for restaurants, hotels, and experience
+              brands.
+            </span>
+          </p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card">
+            <div class="card-top">
+              <span class="feature-number">01</span>
+              <span class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></span>
+            </div>
+            <h3>Unified Inbox</h3>
+            <p>Bring every guest review, comment, and rating into one calm command center.</p>
+            <a href="#spotlight" aria-label="Learn more about Unified Inbox"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></a>
+          </article>
+          <article class="feature-card">
+            <div class="card-top">
+              <span class="feature-number">02</span>
+              <span class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M13 8H7"/><path d="M17 12H7"/></svg></span>
+            </div>
+            <h3>AI-Powered Responses</h3>
+            <p>Draft thoughtful, on-brand replies in seconds without losing the human touch.</p>
+            <a href="#spotlight" aria-label="Learn more about AI-Powered Responses"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></a>
+          </article>
+          <article class="feature-card">
+            <div class="card-top">
+              <span class="feature-number">03</span>
+              <span class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg></span>
+            </div>
+            <h3>Sentiment Analysis</h3>
+            <p>Spot praise, risk, and recurring themes before they become reputation trends.</p>
+            <a href="#spotlight" aria-label="Learn more about Sentiment Analysis"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></a>
+          </article>
+          <article class="feature-card">
+            <div class="card-top">
+              <span class="feature-number">04</span>
+              <span class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+            </div>
+            <h3>Team Collaboration</h3>
+            <p>Assign reviews, leave internal notes, and keep ownership crystal clear.</p>
+            <a href="#spotlight" aria-label="Learn more about Team Collaboration"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></a>
+          </article>
+          <article class="feature-card">
+            <div class="card-top">
+              <span class="feature-number">05</span>
+              <span class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span>
+            </div>
+            <h3>Real-Time Alerts</h3>
+            <p>Notify the right person the moment a high-priority guest review lands.</p>
+            <a href="#spotlight" aria-label="Learn more about Real-Time Alerts"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></a>
+          </article>
+          <article class="feature-card">
+            <div class="card-top">
+              <span class="feature-number">06</span>
+              <span class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></span>
+            </div>
+            <h3>Analytics and Insights</h3>
+            <p>Understand performance by location, channel, team, and guest experience.</p>
+            <a href="#spotlight" aria-label="Learn more about Analytics and Insights"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></a>
+          </article>
+        </div>
+      </section>
+
+      <div class="marquee-wrap" id="integrations" aria-label="Review platforms connected to Trusty">
+        <div class="marquee-track">
+          <span class="logo-pill"><span class="logo-spark">✦</span><span>Google Reviews</span></span>
+          <span class="logo-pill"><span class="logo-spark">✦</span><span>TripAdvisor</span></span>
+          <span class="logo-pill"><span class="logo-spark">✦</span><span>Yelp</span></span>
+          <span class="logo-pill"><span class="logo-spark">✦</span><span>Booking.com</span></span>
+          <span class="logo-pill"><span class="logo-spark">✦</span><span>Airbnb</span></span>
+          <span class="logo-pill"><span class="logo-spark">✦</span><span>OpenTable</span></span>
+          <span class="logo-pill"><span class="logo-spark">✦</span><span>Trustpilot</span></span>
+          <span class="logo-pill"><span class="logo-spark">✦</span><span>Facebook</span></span>
+          <span class="logo-pill"><span class="logo-spark">✦</span><span>Google Reviews</span></span>
+          <span class="logo-pill"><span class="logo-spark">✦</span><span>TripAdvisor</span></span>
+          <span class="logo-pill"><span class="logo-spark">✦</span><span>Yelp</span></span>
+          <span class="logo-pill"><span class="logo-spark">✦</span><span>Booking.com</span></span>
+          <span class="logo-pill"><span class="logo-spark">✦</span><span>Airbnb</span></span>
+          <span class="logo-pill"><span class="logo-spark">✦</span><span>OpenTable</span></span>
+          <span class="logo-pill"><span class="logo-spark">✦</span><span>Trustpilot</span></span>
+          <span class="logo-pill"><span class="logo-spark">✦</span><span>Facebook</span></span>
+        </div>
+      </div>
+
+      <section class="spotlight section-shell" id="spotlight">
+        <div class="spotlight-copy">
+          <p class="eyebrow">
+            <span class="eyebrow-line"></span>
+            <span>Protect the moments that matter</span>
+          </p>
+          <h2>
+            <span>Respond Before Reviews</span><br />
+            <em>Damage Your Reputation.</em>
+          </h2>
+          <p>
+            <span>
+              See the newest guest feedback, priority sentiment, and suggested replies in a single review inbox designed
+              for busy operators.
+            </span>
+          </p>
+          <a class="text-link" href="#stories">
+            <span>Explore the workflow</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+          </a>
+        </div>
+        <div class="product-stage" aria-label="Mockup of a Trusty review inbox">
+          <div class="stage-glow" aria-hidden="true"></div>
+          <div class="orbit orbit-a" aria-hidden="true"></div>
+          <div class="orbit orbit-b" aria-hidden="true"></div>
+          <div class="stage-panel review-inbox-panel">
+            <div class="panel-top">
+              <span class="mini-brand">
+                <span class="brand-mark small" aria-hidden="true">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </span>
+                <span>Trusty Inbox</span>
+              </span>
+              <span class="panel-time">Live</span>
+            </div>
+            <div class="inbox-summary">
+              <span class="panel-kicker">TODAY'S REVIEWS</span>
+              <strong><span>28</span><small>new</small></strong>
+            </div>
+            <div class="review-list">
+              <article class="review-card">
+                <div class="review-card-top">
+                  <span>Google Reviews</span>
+                  <span class="rating-pill">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    <span>5.0</span>
+                  </span>
+                </div>
+                <p>
+                  <strong>M. Alvarez</strong>
+                  <span>The team remembered our anniversary and made the evening feel personal.</span>
+                </p>
+                <button type="button" class="reply-button"><span>Ready reply</span></button>
+              </article>
+              <article class="review-card">
+                <div class="review-card-top">
+                  <span>TripAdvisor</span>
+                  <span class="rating-pill">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    <span>4.0</span>
+                  </span>
+                </div>
+                <p>
+                  <strong>Priya S.</strong>
+                  <span>Beautiful room and warm staff. Breakfast could use faster refills.</span>
+                </p>
+                <button type="button" class="reply-button"><span>Assign</span></button>
+              </article>
+              <article class="review-card">
+                <div class="review-card-top">
+                  <span>Yelp</span>
+                  <span class="rating-pill">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    <span>2.0</span>
+                  </span>
+                </div>
+                <p>
+                  <strong>Jon R.</strong>
+                  <span>Our guide was great, but the meeting point directions were confusing.</span>
+                </p>
+                <button type="button" class="reply-button"><span>Urgent</span></button>
+              </article>
+            </div>
+            <div class="panel-bottom">
+              <span>Response queue</span>
+              <strong>92%</strong>
+            </div>
           </div>
-          <nav>
-            <a href="./app/">Open app</a>
-            <a href="./privacy.html">Privacy</a>
-            <button type="button" class="replay-link" id="replay-intro">Replay intro</button>
-          </nav>
-        </header>
+          <span class="stage-label label-one">01 / INBOX</span>
+          <span class="stage-label label-two">REVIEWS IN SYNC</span>
+        </div>
+      </section>
 
-        <div class="hero-main">
+      <section class="stats-section" id="pricing">
+        <div class="stats-inner">
+          <p class="eyebrow">
+            <span class="eyebrow-line"></span>
+            <span>Built for operators at scale</span>
+          </p>
+          <div class="stats-grid">
+            <div class="stat"><strong>50K+</strong><span>Businesses</span></div>
+            <div class="stat"><strong>2M+</strong><span>Reviews Managed</span></div>
+            <div class="stat"><strong>4.8</strong><span>star Avg Rating</span></div>
+            <div class="stat"><strong>3x</strong><span>Faster Replies</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="stories section-shell" id="stories">
+        <div class="stories-heading">
           <div>
-            <div class="eyebrow"><i></i> Restaurant review inbox</div>
-            <h1 class="hero-title">
-              <span class="line"><span>Stay on</span></span>
-              <span class="line"><span>top of every</span></span>
-              <span class="line"><span>review.</span></span>
-            </h1>
-            <p class="hero-sub">
-              Connect Google Business Profile. Surface negative feedback early.
-              Reply from one calm place — built for owners who can’t miss a guest.
+            <p class="eyebrow">
+              <span class="eyebrow-line"></span>
+              <span>Operator stories</span>
             </p>
-            <div class="cta-row">
-              <a class="cta" href="./app/">Open Trusty <span aria-hidden="true">→</span></a>
-              <a class="cta-ghost" href="./privacy.html">Privacy Policy</a>
-            </div>
+            <h2>
+              <span>Guest trust,</span><br />
+              <em>handled daily.</em>
+            </h2>
           </div>
-
-          <div class="ui-stack" aria-hidden="true">
-            <div class="glass main">
-              <div class="g-top">
-                <span class="g-name">Alex M.</span>
-                <span class="g-badge">Needs reply</span>
-              </div>
-              <div class="g-stars">★☆☆☆☆</div>
-              <p class="g-text">Waited 40 minutes. Pasta arrived cold. Nobody checked on us.</p>
+          <p>
+            <span>Business owners use Trusty to answer faster, coach teams, and turn every review into a better next visit.</span>
+          </p>
+        </div>
+        <div class="testimonial-row">
+          <article class="testimonial">
+            <div class="testimonial-meta">
+              <span class="avatar">LC</span>
+              <span>
+                <strong>Lena Cortez</strong>
+                <small>Owner, Marlow House Restaurant</small>
+              </span>
             </div>
-            <div class="glass side">
-              <div class="g-top">
-                <span class="g-name">Maya R.</span>
-                <span class="g-badge ok">Replied</span>
-              </div>
-              <div class="g-stars">★★★★★</div>
-              <p class="g-text">Best brunch patio in town. Coming back Saturday.</p>
+            <blockquote>
+              <span>“Trusty gave our managers one place to catch every review and respond with care before dinner service even starts.”</span>
+            </blockquote>
+            <span class="quote-mark">”</span>
+          </article>
+          <article class="testimonial">
+            <div class="testimonial-meta">
+              <span class="avatar">HB</span>
+              <span>
+                <strong>Hugo Bennett</strong>
+                <small>General Manager, The Alder Hotel</small>
+              </span>
             </div>
-            <div class="glass chip">
-              <span class="g-dot"></span>
-              Live inbox · 3 need attention
+            <blockquote>
+              <span>“We used to miss feedback across channels. Now our team sees the full guest story and acts on it the same day.”</span>
+            </blockquote>
+            <span class="quote-mark">”</span>
+          </article>
+          <article class="testimonial">
+            <div class="testimonial-meta">
+              <span class="avatar">NP</span>
+              <span>
+                <strong>Nora Park</strong>
+                <small>Founder, Harbor &amp; Trail Experiences</small>
+              </span>
             </div>
-          </div>
+            <blockquote>
+              <span>“The alerts and sentiment trends help us protect five-star moments while learning exactly where guests need more.”</span>
+            </blockquote>
+            <span class="quote-mark">”</span>
+          </article>
         </div>
       </section>
 
-      <section class="story" id="story">
-        <article class="story-card">
-          <div class="story-num">01 — Catch</div>
-          <h2>See the 1★ first</h2>
-          <p>Urgent reviews rise to the top so you can respond before the story spreads.</p>
-        </article>
-        <article class="story-card">
-          <div class="story-num">02 — Reply</div>
-          <h2>One calm inbox</h2>
-          <p>Draft, optimize with AI, and send — without juggling tabs and screenshots.</p>
-        </article>
-        <article class="story-card">
-          <div class="story-num">03 — Share</div>
-          <h2>Turn praise into posts</h2>
-          <p>Export branded graphics from 4–5★ reviews for Instagram, stories, and your site.</p>
-        </article>
+      <section class="closing section-shell" id="contact">
+        <div class="closing-glow" aria-hidden="true"></div>
+        <p class="eyebrow">
+          <span class="eyebrow-line"></span>
+          <span>Start where your guests are talking</span>
+        </p>
+        <h2>
+          <span>Your Reputation</span><br />
+          <em>Starts Here.</em>
+        </h2>
+        <p class="closing-note">
+          <span>Join the hospitality teams bringing every guest review into focus.</span>
+        </p>
+        <form class="subscribe-form" id="subscribe-form">
+          <div class="form-fields" id="form-fields">
+            <input type="email" id="email" placeholder="Work email address" aria-label="Work email address" required />
+            <button type="submit" class="button button-primary">
+              <span>Get Early Access</span>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+            </button>
+          </div>
+        </form>
+        <footer class="site-footer" id="blog">
+          <a href="#top" class="brand" aria-label="Trusty home">
+            <span class="brand-mark" aria-hidden="true">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </span>
+            <span><span>Trusty</span><span class="brand-dot">.</span></span>
+          </a>
+          <div class="footer-links">
+            <a href="#features"><span>Product</span></a>
+            <a href="#pricing"><span>Pricing</span></a>
+            <a href="#integrations"><span>Integrations</span></a>
+            <a href="./app/?demo=1"><span>Open app</span></a>
+            <a href="./privacy.html"><span>Privacy</span></a>
+            <a href="mailto:privacy@trustydirect.com"><span>Support</span></a>
+          </div>
+          <span class="copyright">© <span id="year">2026</span> Trusty</span>
+        </footer>
       </section>
-
-      <div class="panel-wrap">
-        <section class="panel">
-          <h2>Who we are</h2>
-          <p>
-            Trusty helps restaurant and local-business owners monitor Google
-            Business Profile reviews. We only access the data you authorize, and
-            we never sell review content or account credentials.
-          </p>
-        </section>
-        <section class="panel">
-          <h2>Website widget</h2>
-          <p>
-            Embed a live reviews carousel with
-            <a href="https://www.trustydirect.com/widget.js">www.trustydirect.com/widget.js</a>.
-            Copy the snippet from <strong>Settings → Get your widget code</strong>
-            in the Trusty app.
-          </p>
-        </section>
-      </div>
-
-      <footer>
-        <span>© <span id="year"></span> Trusty · <a href="https://www.trustydirect.com/">www.trustydirect.com</a></span>
-        <span>
-          <a href="./privacy.html">Privacy Policy</a>
-          ·
-          <a href="mailto:privacy@trustydirect.com">privacy@trustydirect.com</a>
-        </span>
-      </footer>
-    </div>
+    </main>
 
     <script>
-      document.getElementById("year").textContent = new Date().getFullYear();
-
       (function () {
-        var intro = document.getElementById("intro");
-        var site = document.getElementById("site");
-        var skip = document.getElementById("intro-skip");
-        var replay = document.getElementById("replay-intro");
-        var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        var done = false;
-        var introTimer = null;
+        var nav = document.getElementById("site-nav");
+        var toggle = document.getElementById("menu-toggle");
+        var links = document.getElementById("nav-links");
+        var form = document.getElementById("subscribe-form");
+        var fields = document.getElementById("form-fields");
+        var year = document.getElementById("year");
 
-        function finish() {
-          if (done) return;
-          done = true;
-          if (introTimer) clearTimeout(introTimer);
-          document.body.classList.remove("intro-lock");
-          intro.classList.add("is-done");
-          intro.classList.remove("is-replaying");
-          site.classList.add("is-ready");
-          try { sessionStorage.setItem("trusty_ms_intro", "1"); } catch (e) {}
+        if (year) year.textContent = String(new Date().getFullYear());
+
+        function onScroll() {
+          if (!nav) return;
+          if (window.scrollY > 24) nav.classList.add("site-nav-scrolled");
+          else nav.classList.remove("site-nav-scrolled");
         }
+        window.addEventListener("scroll", onScroll, { passive: true });
+        onScroll();
 
-        function playIntro() {
-          done = false;
-          if (introTimer) clearTimeout(introTimer);
-          try { sessionStorage.removeItem("trusty_ms_intro"); } catch (e) {}
-          document.body.classList.add("intro-lock");
-          site.classList.remove("is-ready");
-          intro.style.display = "";
-          intro.classList.remove("is-done", "is-playing", "is-replaying");
-          void intro.offsetWidth;
-          intro.classList.add("is-playing", "is-replaying");
-          introTimer = setTimeout(finish, 3400);
-          window.scrollTo(0, 0);
-        }
-
-        skip.addEventListener("click", finish);
-        if (replay) replay.addEventListener("click", playIntro);
-
-        var seen = false;
-        try { seen = sessionStorage.getItem("trusty_ms_intro") === "1"; } catch (e) {}
-
-        if (reduce) {
-          finish();
-          intro.style.display = "none";
-        } else if (seen) {
-          finish();
-          intro.style.display = "none";
-        } else {
-          introTimer = setTimeout(finish, 3400);
-        }
-
-        // Subtle mouse parallax (MotionSites ambient depth)
-        var layers = document.querySelectorAll(".parallax-layer");
-        if (!reduce && layers.length) {
-          window.addEventListener("pointermove", function (e) {
-            var x = (e.clientX / window.innerWidth - 0.5) * 2;
-            var y = (e.clientY / window.innerHeight - 0.5) * 2;
-            layers.forEach(function (layer) {
-              var s = parseFloat(layer.getAttribute("data-speed") || "0.04");
-              layer.style.transform =
-                "translate3d(" + (x * 28 * s * 20) + "px," + (y * 22 * s * 20) + "px,0)";
+        if (toggle && links) {
+          toggle.addEventListener("click", function () {
+            var open = links.classList.toggle("nav-links-open");
+            toggle.setAttribute("aria-expanded", open ? "true" : "false");
+          });
+          links.querySelectorAll("a").forEach(function (a) {
+            a.addEventListener("click", function () {
+              links.classList.remove("nav-links-open");
+              toggle.setAttribute("aria-expanded", "false");
             });
           });
         }
 
-        // Story cards reveal
-        var cards = document.querySelectorAll(".story-card");
-        if ("IntersectionObserver" in window) {
-          var io = new IntersectionObserver(
-            function (entries) {
-              entries.forEach(function (entry) {
-                if (entry.isIntersecting) entry.target.classList.add("is-in");
-              });
-            },
-            { threshold: 0.25 }
-          );
-          cards.forEach(function (c) { io.observe(c); });
-        } else {
-          cards.forEach(function (c) { c.classList.add("is-in"); });
+        if (form && fields) {
+          form.addEventListener("submit", function (event) {
+            event.preventDefault();
+            var input = document.getElementById("email");
+            if (!input || !input.value.trim()) return;
+            fields.outerHTML =
+              '<p class="success-message">You\'re on the list. Trusty will be in touch soon.</p>';
+          });
         }
       })();
     </script>
