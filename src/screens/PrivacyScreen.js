@@ -1,10 +1,12 @@
-import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, ScrollView, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COMPANY } from '../config/company';
 import { PRIVACY_POLICY_TEXT } from '../content/privacyPolicy';
-import { colors, fonts } from '../theme';
+import { useThemedStyles } from '../hooks/useThemedStyles';
 
 export function PrivacyScreen() {
+  const styles = useThemedStyles(createStyles);
+
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.content}>
@@ -18,31 +20,33 @@ export function PrivacyScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
-  content: {
-    padding: 20,
-    paddingBottom: 40,
-  },
-  title: {
-    color: colors.text,
-    fontSize: 28,
-    fontFamily: fonts.sansBold,
-    marginBottom: 16,
-  },
-  body: {
-    color: colors.textMuted,
-    fontSize: 15,
-    lineHeight: 24,
-    fontFamily: fonts.sans,
-  },
-  external: {
-    marginTop: 24,
-    color: colors.accent,
-    fontSize: 15,
-    fontFamily: fonts.sansSemiBold,
-  },
-});
+function createStyles(colors, fonts) {
+  return {
+    container: {
+      flex: 1,
+      backgroundColor: colors.bg,
+    },
+    content: {
+      padding: 20,
+      paddingBottom: 40,
+    },
+    title: {
+      color: colors.text,
+      fontSize: 28,
+      fontFamily: fonts.sansBold,
+      marginBottom: 16,
+    },
+    body: {
+      color: colors.textMuted,
+      fontSize: 15,
+      lineHeight: 24,
+      fontFamily: fonts.sans,
+    },
+    external: {
+      marginTop: 24,
+      color: colors.accent,
+      fontSize: 15,
+      fontFamily: fonts.sansSemiBold,
+    },
+  };
+}

@@ -4,12 +4,12 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, fonts } from '../theme';
+import { useTheme } from '../context/ThemeContext';
+import { useThemedStyles } from '../hooks/useThemedStyles';
 import {
   DATE_OPTIONS,
   RATING_OPTIONS,
@@ -20,6 +20,8 @@ import {
 
 export function InboxSortFilterSheet({ visible, initialQuery, onApply, onReset, onClose }) {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const [draft, setDraft] = useState(initialQuery);
 
   useEffect(() => {
@@ -165,6 +167,7 @@ export function InboxSortFilterSheet({ visible, initialQuery, onApply, onReset, 
 }
 
 function Section({ title, hint, children }) {
+  const styles = useThemedStyles(createStyles);
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
@@ -175,6 +178,8 @@ function Section({ title, hint, children }) {
 }
 
 function OptionRow({ label, selected, mode, onPress }) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   return (
     <Pressable
       onPress={onPress}
@@ -193,7 +198,7 @@ function OptionRow({ label, selected, mode, onPress }) {
           mode === 'radio' ? (
             <View style={styles.radioDot} />
           ) : (
-            <Feather name="check" size={12} color="#0b0c0e" />
+            <Feather name="check" size={12} color={colors.onAccent} />
           )
         ) : null}
       </View>
@@ -201,163 +206,165 @@ function OptionRow({ label, selected, mode, onPress }) {
   );
 }
 
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.55)',
-  },
-  backdropTap: {
-    flex: 1,
-  },
-  sheet: {
-    backgroundColor: colors.bg,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    borderTopWidth: 1,
-    borderColor: colors.border,
-    maxHeight: '88%',
-    paddingTop: 8,
-  },
-  handle: {
-    alignSelf: 'center',
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.border,
-    marginBottom: 10,
-  },
-  sheetHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingBottom: 12,
-  },
-  sheetTitle: {
-    color: colors.text,
-    fontSize: 22,
-    fontFamily: fonts.display,
-    letterSpacing: -0.4,
-  },
-  closeBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.surface,
-  },
-  scroll: {
-    flexGrow: 0,
-  },
-  scrollContent: {
-    paddingHorizontal: 24,
-    paddingBottom: 12,
-  },
-  section: {
-    marginBottom: 26,
-  },
-  sectionTitle: {
-    color: colors.text,
-    fontSize: 15,
-    fontFamily: fonts.sansSemiBold,
-    marginBottom: 4,
-  },
-  sectionHint: {
-    color: colors.textDim,
-    fontSize: 13,
-    fontFamily: fonts.sans,
-    marginBottom: 10,
-  },
-  sectionBody: {
-    marginTop: 6,
-    gap: 2,
-  },
-  optionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.hairline,
-  },
-  optionLabel: {
-    color: colors.textMuted,
-    fontSize: 15,
-    fontFamily: fonts.sans,
-    flex: 1,
-    paddingRight: 16,
-  },
-  optionLabelActive: {
-    color: colors.text,
-    fontFamily: fonts.sansMedium,
-  },
-  radio: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  radioActive: {
-    borderColor: colors.accent,
-  },
-  radioDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: colors.accent,
-  },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkboxActive: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
-  },
-  footer: {
-    flexDirection: 'row',
-    gap: 10,
-    paddingHorizontal: 24,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: colors.hairline,
-  },
-  resetBtn: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-  },
-  resetText: {
-    color: colors.textMuted,
-    fontSize: 15,
-    fontFamily: fonts.sansSemiBold,
-  },
-  applyBtn: {
-    flex: 1.4,
-    paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: colors.white,
-    alignItems: 'center',
-  },
-  applyText: {
-    color: '#0b0c0e',
-    fontSize: 15,
-    fontFamily: fonts.sansBold,
-  },
-  pressed: {
-    opacity: 0.75,
-  },
-});
+function createStyles(colors, fonts) {
+  return {
+    backdrop: {
+      flex: 1,
+      justifyContent: 'flex-end',
+      backgroundColor: 'rgba(0,0,0,0.55)',
+    },
+    backdropTap: {
+      flex: 1,
+    },
+    sheet: {
+      backgroundColor: colors.bg,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      borderTopWidth: 1,
+      borderColor: colors.border,
+      maxHeight: '88%',
+      paddingTop: 8,
+    },
+    handle: {
+      alignSelf: 'center',
+      width: 36,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: colors.border,
+      marginBottom: 10,
+    },
+    sheetHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 24,
+      paddingBottom: 12,
+    },
+    sheetTitle: {
+      color: colors.text,
+      fontSize: 22,
+      fontFamily: fonts.display,
+      letterSpacing: -0.4,
+    },
+    closeBtn: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.surface,
+    },
+    scroll: {
+      flexGrow: 0,
+    },
+    scrollContent: {
+      paddingHorizontal: 24,
+      paddingBottom: 12,
+    },
+    section: {
+      marginBottom: 26,
+    },
+    sectionTitle: {
+      color: colors.text,
+      fontSize: 15,
+      fontFamily: fonts.sansSemiBold,
+      marginBottom: 4,
+    },
+    sectionHint: {
+      color: colors.textDim,
+      fontSize: 13,
+      fontFamily: fonts.sans,
+      marginBottom: 10,
+    },
+    sectionBody: {
+      marginTop: 6,
+      gap: 2,
+    },
+    optionRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 14,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.hairline,
+    },
+    optionLabel: {
+      color: colors.textMuted,
+      fontSize: 15,
+      fontFamily: fonts.sans,
+      flex: 1,
+      paddingRight: 16,
+    },
+    optionLabelActive: {
+      color: colors.text,
+      fontFamily: fonts.sansMedium,
+    },
+    radio: {
+      width: 22,
+      height: 22,
+      borderRadius: 11,
+      borderWidth: 1.5,
+      borderColor: colors.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    radioActive: {
+      borderColor: colors.accent,
+    },
+    radioDot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: colors.accent,
+    },
+    checkbox: {
+      width: 22,
+      height: 22,
+      borderRadius: 6,
+      borderWidth: 1.5,
+      borderColor: colors.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    checkboxActive: {
+      backgroundColor: colors.accent,
+      borderColor: colors.accent,
+    },
+    footer: {
+      flexDirection: 'row',
+      gap: 10,
+      paddingHorizontal: 24,
+      paddingTop: 12,
+      borderTopWidth: 1,
+      borderTopColor: colors.hairline,
+    },
+    resetBtn: {
+      flex: 1,
+      paddingVertical: 14,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: 'center',
+    },
+    resetText: {
+      color: colors.textMuted,
+      fontSize: 15,
+      fontFamily: fonts.sansSemiBold,
+    },
+    applyBtn: {
+      flex: 1.4,
+      paddingVertical: 14,
+      borderRadius: 12,
+      backgroundColor: colors.pillActiveBg,
+      alignItems: 'center',
+    },
+    applyText: {
+      color: colors.pillActiveText,
+      fontSize: 15,
+      fontFamily: fonts.sansBold,
+    },
+    pressed: {
+      opacity: 0.75,
+    },
+  };
+}

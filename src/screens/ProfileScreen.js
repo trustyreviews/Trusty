@@ -5,7 +5,6 @@ import {
   Linking,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -13,8 +12,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COMPANY } from '../config/company';
 import { useReviews } from '../context/ReviewsContext';
+import { useTheme } from '../context/ThemeContext';
 import { useUser } from '../context/UserContext';
-import { colors, fonts } from '../theme';
+import { useThemedStyles } from '../hooks/useThemedStyles';
 
 // Person account screen — login identity, sign out, help.
 // Business preferences live in Settings; keep those concerns separate.
@@ -23,6 +23,8 @@ const APP_VERSION = '1.0.0';
 export function ProfileScreen({ navigation }) {
   const { user, initials, updateUser } = useUser();
   const { disconnectBusiness } = useReviews();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const [editing, setEditing] = useState(false);
   const [draftName, setDraftName] = useState(user.name);
   const [draftEmail, setDraftEmail] = useState(user.email);
@@ -193,194 +195,196 @@ export function ProfileScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
-  content: {
-    paddingHorizontal: 28,
-    paddingTop: 8,
-    paddingBottom: 40,
-    maxWidth: 560,
-    width: '100%',
-    alignSelf: 'center',
-  },
-  hero: {
-    alignItems: 'center',
-    marginBottom: 32,
-    marginTop: 8,
-  },
-  avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: colors.avatar,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  avatarText: {
-    color: colors.textMuted,
-    fontSize: 22,
-    fontFamily: fonts.sansBold,
-  },
-  title: {
-    color: colors.text,
-    fontSize: 28,
-    fontFamily: fonts.display,
-    letterSpacing: -0.5,
-    marginBottom: 4,
-  },
-  subtitle: {
-    color: colors.textDim,
-    fontSize: 14,
-    fontFamily: fonts.sans,
-  },
-  sectionLabel: {
-    color: colors.textDim,
-    fontSize: 12,
-    fontFamily: fonts.sansSemiBold,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    marginBottom: 10,
-  },
-  sectionSpacer: {
-    marginTop: 28,
-  },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: 14,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: 10,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: 12,
-    paddingBottom: 16,
-    marginBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.hairline,
-  },
-  infoRowLast: {
-    paddingBottom: 0,
-    marginBottom: 0,
-    borderBottomWidth: 0,
-  },
-  infoCopy: {
-    flex: 1,
-  },
-  fieldLabel: {
-    color: colors.textDim,
-    fontSize: 12,
-    fontFamily: fonts.sansSemiBold,
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-    marginBottom: 6,
-  },
-  fieldValue: {
-    color: colors.text,
-    fontSize: 16,
-    fontFamily: fonts.sansMedium,
-  },
-  editLink: {
-    color: colors.accent,
-    fontSize: 14,
-    fontFamily: fonts.sansSemiBold,
-    marginTop: 2,
-  },
-  input: {
-    color: colors.text,
-    fontSize: 16,
-    fontFamily: fonts.sans,
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 11,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  editActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 10,
-    marginTop: 4,
-  },
-  ghostBtn: {
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-  },
-  ghostBtnText: {
-    color: colors.textMuted,
-    fontSize: 14,
-    fontFamily: fonts.sansSemiBold,
-  },
-  saveBtn: {
-    backgroundColor: colors.white,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-  },
-  saveBtnText: {
-    color: '#0b0c0e',
-    fontSize: 14,
-    fontFamily: fonts.sansBold,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.surface,
-    borderRadius: 14,
-    paddingVertical: 16,
-    paddingHorizontal: 18,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: 8,
-  },
-  rowText: {
-    color: colors.text,
-    fontSize: 15,
-    fontFamily: fonts.sansMedium,
-  },
-  rowMeta: {
-    color: colors.textDim,
-    fontSize: 13,
-    fontFamily: fonts.sans,
-    marginTop: 3,
-  },
-  signOutWrap: {
-    marginTop: 40,
-    paddingTop: 28,
-    borderTopWidth: 1,
-    borderTopColor: colors.hairline,
-  },
-  signOutBtn: {
-    alignItems: 'center',
-    paddingVertical: 14,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.dangerBorder,
-    backgroundColor: colors.dangerSoft,
-  },
-  signOutText: {
-    color: colors.dangerText,
-    fontSize: 15,
-    fontFamily: fonts.sansSemiBold,
-  },
-  version: {
-    marginTop: 28,
-    textAlign: 'center',
-    color: colors.textDim,
-    fontSize: 12,
-    fontFamily: fonts.sans,
-  },
-  pressed: {
-    opacity: 0.7,
-  },
-});
+function createStyles(colors, fonts) {
+  return {
+    container: {
+      flex: 1,
+      backgroundColor: colors.bg,
+    },
+    content: {
+      paddingHorizontal: 28,
+      paddingTop: 8,
+      paddingBottom: 40,
+      maxWidth: 560,
+      width: '100%',
+      alignSelf: 'center',
+    },
+    hero: {
+      alignItems: 'center',
+      marginBottom: 32,
+      marginTop: 8,
+    },
+    avatar: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      backgroundColor: colors.avatar,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 16,
+    },
+    avatarText: {
+      color: colors.textMuted,
+      fontSize: 22,
+      fontFamily: fonts.sansBold,
+    },
+    title: {
+      color: colors.text,
+      fontSize: 28,
+      fontFamily: fonts.display,
+      letterSpacing: -0.5,
+      marginBottom: 4,
+    },
+    subtitle: {
+      color: colors.textDim,
+      fontSize: 14,
+      fontFamily: fonts.sans,
+    },
+    sectionLabel: {
+      color: colors.textDim,
+      fontSize: 12,
+      fontFamily: fonts.sansSemiBold,
+      letterSpacing: 0.8,
+      textTransform: 'uppercase',
+      marginBottom: 10,
+    },
+    sectionSpacer: {
+      marginTop: 28,
+    },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: 14,
+      padding: 18,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginBottom: 10,
+    },
+    infoRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      gap: 12,
+      paddingBottom: 16,
+      marginBottom: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.hairline,
+    },
+    infoRowLast: {
+      paddingBottom: 0,
+      marginBottom: 0,
+      borderBottomWidth: 0,
+    },
+    infoCopy: {
+      flex: 1,
+    },
+    fieldLabel: {
+      color: colors.textDim,
+      fontSize: 12,
+      fontFamily: fonts.sansSemiBold,
+      textTransform: 'uppercase',
+      letterSpacing: 0.4,
+      marginBottom: 6,
+    },
+    fieldValue: {
+      color: colors.text,
+      fontSize: 16,
+      fontFamily: fonts.sansMedium,
+    },
+    editLink: {
+      color: colors.accent,
+      fontSize: 14,
+      fontFamily: fonts.sansSemiBold,
+      marginTop: 2,
+    },
+    input: {
+      color: colors.text,
+      fontSize: 16,
+      fontFamily: fonts.sans,
+      backgroundColor: colors.surfaceAlt,
+      borderRadius: 10,
+      paddingHorizontal: 12,
+      paddingVertical: 11,
+      marginBottom: 14,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    editActions: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      gap: 10,
+      marginTop: 4,
+    },
+    ghostBtn: {
+      paddingVertical: 10,
+      paddingHorizontal: 14,
+    },
+    ghostBtnText: {
+      color: colors.textMuted,
+      fontSize: 14,
+      fontFamily: fonts.sansSemiBold,
+    },
+    saveBtn: {
+      backgroundColor: colors.pillActiveBg,
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      borderRadius: 10,
+    },
+    saveBtnText: {
+      color: colors.pillActiveText,
+      fontSize: 14,
+      fontFamily: fonts.sansBold,
+    },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: colors.surface,
+      borderRadius: 14,
+      paddingVertical: 16,
+      paddingHorizontal: 18,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginBottom: 8,
+    },
+    rowText: {
+      color: colors.text,
+      fontSize: 15,
+      fontFamily: fonts.sansMedium,
+    },
+    rowMeta: {
+      color: colors.textDim,
+      fontSize: 13,
+      fontFamily: fonts.sans,
+      marginTop: 3,
+    },
+    signOutWrap: {
+      marginTop: 40,
+      paddingTop: 28,
+      borderTopWidth: 1,
+      borderTopColor: colors.hairline,
+    },
+    signOutBtn: {
+      alignItems: 'center',
+      paddingVertical: 14,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.dangerBorder,
+      backgroundColor: colors.dangerSoft,
+    },
+    signOutText: {
+      color: colors.dangerText,
+      fontSize: 15,
+      fontFamily: fonts.sansSemiBold,
+    },
+    version: {
+      marginTop: 28,
+      textAlign: 'center',
+      color: colors.textDim,
+      fontSize: 12,
+      fontFamily: fonts.sans,
+    },
+    pressed: {
+      opacity: 0.7,
+    },
+  };
+}

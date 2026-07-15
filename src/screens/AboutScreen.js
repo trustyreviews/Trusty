@@ -1,9 +1,11 @@
-import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COMPANY } from '../config/company';
-import { colors, fonts } from '../theme';
+import { useThemedStyles } from '../hooks/useThemedStyles';
 
 export function AboutScreen() {
+  const styles = useThemedStyles(createStyles);
+
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.content}>
@@ -42,54 +44,56 @@ export function AboutScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
-  content: {
-    padding: 20,
-    paddingBottom: 40,
-  },
-  brand: {
-    color: colors.text,
-    fontSize: 36,
-    fontFamily: fonts.displayBold,
-    letterSpacing: -1,
-    marginBottom: 8,
-  },
-  tagline: {
-    color: colors.textMuted,
-    fontSize: 17,
-    marginBottom: 20,
-    fontFamily: fonts.sans,
-  },
-  body: {
-    color: colors.textMuted,
-    fontSize: 16,
-    lineHeight: 24,
-    marginBottom: 24,
-    fontFamily: fonts.sans,
-  },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.surfaceAlt,
-    marginBottom: 12,
-  },
-  label: {
-    color: colors.textDim,
-    fontSize: 12,
-    fontFamily: fonts.sansBold,
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-    marginBottom: 6,
-  },
-  link: {
-    color: colors.accent,
-    fontSize: 16,
-    fontFamily: fonts.sansSemiBold,
-  },
-});
+function createStyles(colors, fonts) {
+  return {
+    container: {
+      flex: 1,
+      backgroundColor: colors.bg,
+    },
+    content: {
+      padding: 20,
+      paddingBottom: 40,
+    },
+    brand: {
+      color: colors.text,
+      fontSize: 36,
+      fontFamily: fonts.displayBold,
+      letterSpacing: -1,
+      marginBottom: 8,
+    },
+    tagline: {
+      color: colors.textMuted,
+      fontSize: 17,
+      marginBottom: 20,
+      fontFamily: fonts.sans,
+    },
+    body: {
+      color: colors.textMuted,
+      fontSize: 16,
+      lineHeight: 24,
+      marginBottom: 24,
+      fontFamily: fonts.sans,
+    },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: colors.surfaceAlt,
+      marginBottom: 12,
+    },
+    label: {
+      color: colors.textDim,
+      fontSize: 12,
+      fontFamily: fonts.sansBold,
+      textTransform: 'uppercase',
+      letterSpacing: 0.4,
+      marginBottom: 6,
+    },
+    link: {
+      color: colors.accent,
+      fontSize: 16,
+      fontFamily: fonts.sansSemiBold,
+    },
+  };
+}

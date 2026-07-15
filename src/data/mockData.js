@@ -178,6 +178,22 @@ export const MOCK_REVIEWS = [
   },
 ];
 
+/** Focus review for the guided demo tour (Priya — unreplied 1★). */
+export const DEMO_FOCUS_REVIEW_ID = 'rev_02';
+
+/** Simulated live review that arrives during the demo session. */
+export const DEMO_INCOMING_REVIEW = {
+  id: 'rev_demo_live',
+  authorName: 'Casey Brooks',
+  source: 'Google Maps',
+  rating: 1,
+  text: 'Just left — patio tables filthy and nobody checked on us for 20 minutes. Posted this before I even got to my car.',
+  date: null, // filled at inject time
+  replied: false,
+  replyText: null,
+  read: false,
+};
+
 /**
  * Simulates loading a connected Google Business Profile.
  * Swap this for a real API call (OAuth + accounts.locations.reviews.list).
@@ -186,5 +202,12 @@ export function fetchMockBusinessProfile() {
   return {
     business: { ...MOCK_BUSINESS },
     reviews: MOCK_REVIEWS.map((review) => ({ ...review })),
+  };
+}
+
+export function createDemoIncomingReview() {
+  return {
+    ...DEMO_INCOMING_REVIEW,
+    date: new Date().toISOString(),
   };
 }

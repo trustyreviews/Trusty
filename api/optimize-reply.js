@@ -7,14 +7,107 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const MODEL = 'gemini-flash-latest';
+const MODELS = [
+  'gemini-3-flash-preview',
+  'gemini-3.1-flash-lite',
+  'gemini-flash-lite-latest',
+  'gemini-2.5-flash-lite',
+  'gemini-flash-latest',
+  'gemini-2.0-flash',
+];
 
-const SYSTEM_INSTRUCTION =
-  'You are helping a small business owner polish a draft reply to a customer review. ' +
-  'Given a rough draft reply, rewrite it to be: warm and genuine, not corporate or robotic; ' +
-  'concise, 2-3 sentences max; professional but human; keep any specific details from the ' +
-  'original draft (apologies, offers, specifics mentioned). Return ONLY the rewritten reply text, ' +
-  'nothing else — no preamble, no explanation, no quotation marks.';
+function systemInstruction(tone) {
+  const toneLine =
+    tone === 'formal'
+      ? 'Use a formal, polished tone (Dear / We / sincerely).'
+      : 'Use a warm, casual tone (Hi / first name / conversational).';
+  return (
+    'You write customer-review replies for a small local business. ' +
+    `${toneLine} ` +
+    'Be warm and genuine, not corporate or robotic. Keep replies concise (2-3 sentences). ' +
+    'Address specifics from the review when relevant. ' +
+    'Return ONLY the reply text — no preamble, no explanation, no quotation marks.'
+  );
+}
+
+function buildUserMessage({
+  reviewText,
+  draftReply,
+  businessName,
+  rating,
+  authorName,
+}) {
+  const hasDraft = typeof draftReply === 'string' && draftReply.trim();
+  const meta = [
+    businessName ? `Business: ${businessName}` : null,
+    authorName ? `Reviewer: ${authorName}` : null,
+    rating != null ? `Rating: ${rating}/5` : null,
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  if (hasDraft) {
+    return (
+      `${meta ? `${meta}\n\n` : ''}` +
+      `Original review: "${reviewText}"\n\n` +
+      `Draft reply: "${draftReply.trim()}"\n\n` +
+      'Polish this draft reply. Keep any specific details the owner included.'
+    );
+  }
+
+  return (
+    `${meta ? `${meta}\n\n` : ''}` +
+    `Original review: "${reviewText}"\n\n` +
+    'Write a fresh reply to this review from the business owner. ' +
+    'There is no draft yet — create the reply from scratch.'
+  );
+}
+
+async function generateReply(apiKey, tone, userMessage) {
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const instruction = systemInstruction(tone === 'formal' ? 'formal' : 'casual');
+  let lastError;
+  let sawQuota = false;
+
+  for (const modelName of MODELS) {
+    try {
+      console.log('[DEBUG] optimize-reply: calling Gemini', { model: modelName });
+      const model = genAI.getGenerativeModel({
+        model: modelName,
+        systemInstruction: instruction,
+      });
+      const result = await model.generateContent(userMessage);
+      const text = result?.response?.text?.().trim();
+      if (text) {
+        console.log('[DEBUG] optimize-reply: Gemini response received', {
+          model: modelName,
+          polishedReply: text,
+        });
+        return text;
+      }
+      lastError = new Error(`Model ${modelName} returned empty text`);
+    } catch (err) {
+      lastError = err;
+      const status = err?.status ?? err?.statusCode;
+      const msg = String(err?.message || '');
+      if (status === 429 || /quota|rate.?limit|limit: 0/i.test(msg)) {
+        sawQuota = true;
+      }
+      console.log('[DEBUG] optimize-reply: Gemini API call failed', {
+        model: modelName,
+        message: err?.message,
+        status,
+      });
+      if (status === 503 || status === 429 || status === 404) continue;
+      throw err;
+    }
+  }
+
+  if (sawQuota && lastError) {
+    lastError.sawQuota = true;
+  }
+  throw lastError || new Error('All Gemini models failed');
+}
 
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -59,60 +152,39 @@ export default async function handler(req, res) {
       body = {};
     }
   }
-  const { reviewText = '', draftReply = '' } = body ?? {};
+  const {
+    reviewText = '',
+    draftReply = '',
+    tone = 'casual',
+    businessName = '',
+    rating,
+    authorName = '',
+  } = body ?? {};
 
   // TEMPORARY — remove once Optimize with AI failures are diagnosed
-  console.log('[DEBUG] optimize-reply: parsed payload', { reviewText, draftReply });
+  console.log('[DEBUG] optimize-reply: parsed payload', {
+    reviewText,
+    draftReply,
+    tone,
+    businessName,
+    rating,
+    authorName,
+  });
 
-  if (typeof draftReply !== 'string' || !draftReply.trim()) {
-    return res.status(400).json({ error: 'draftReply is required' });
+  if (typeof reviewText !== 'string' || !reviewText.trim()) {
+    return res.status(400).json({ error: 'reviewText is required' });
   }
 
-  const userMessage = `Original review: "${reviewText}"\n\nDraft reply: "${draftReply}"\n\nPolish this reply.`;
+  const userMessage = buildUserMessage({
+    reviewText,
+    draftReply,
+    businessName,
+    rating,
+    authorName,
+  });
 
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: MODEL,
-      systemInstruction: SYSTEM_INSTRUCTION,
-    });
-
-    // TEMPORARY — remove once Optimize with AI failures are diagnosed
-    console.log('[DEBUG] optimize-reply: calling Gemini', { model: MODEL });
-
-    let result;
-    try {
-      result = await model.generateContent(userMessage);
-    } catch (geminiErr) {
-      // TEMPORARY — remove once Optimize with AI failures are diagnosed
-      console.log('[DEBUG] optimize-reply: Gemini API call failed', {
-        message: geminiErr?.message,
-        name: geminiErr?.name,
-        status: geminiErr?.status ?? geminiErr?.statusCode,
-        statusText: geminiErr?.statusText,
-        // GoogleGenerativeAIError often nests details here
-        errorDetails: geminiErr?.errorDetails,
-        cause: geminiErr?.cause,
-        fullError: geminiErr,
-        stringified: String(geminiErr),
-      });
-      throw geminiErr;
-    }
-
-    const polishedReply = result?.response?.text?.().trim();
-
-    // TEMPORARY — remove once Optimize with AI failures are diagnosed
-    console.log('[DEBUG] optimize-reply: Gemini response received', {
-      polishedReply,
-      candidates: result?.response?.candidates,
-      promptFeedback: result?.response?.promptFeedback,
-    });
-
-    if (!polishedReply) {
-      console.error('Gemini returned no text');
-      return res.status(502).json({ error: 'Failed to optimize reply' });
-    }
-
+    const polishedReply = await generateReply(apiKey, tone, userMessage);
     return res.status(200).json({ polishedReply });
   } catch (err) {
     // TEMPORARY — remove once Optimize with AI failures are diagnosed
@@ -120,10 +192,21 @@ export default async function handler(req, res) {
       message: err?.message,
       name: err?.name,
       status: err?.status ?? err?.statusCode,
-      errorDetails: err?.errorDetails,
-      fullError: err,
     });
     console.error('Optimize reply request failed', err);
-    return res.status(502).json({ error: 'Failed to optimize reply' });
+    const status = err?.status ?? err?.statusCode;
+    const busy = status === 503 || status === 429;
+    const quota =
+      err?.sawQuota ||
+      (busy &&
+        typeof err?.message === 'string' &&
+        /quota|rate.?limit|limit: 0/i.test(err.message));
+    return res.status(502).json({
+      error: quota
+        ? 'Gemini quota exceeded — wait a minute or create a new key at aistudio.google.com/apikey'
+        : busy
+          ? 'AI is busy right now — try again in a moment'
+          : 'Failed to optimize reply',
+    });
   }
 }

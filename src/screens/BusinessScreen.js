@@ -1,12 +1,13 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LegalLinks } from '../components/LegalLinks';
 import { StarRating } from '../components/StarRating';
 import { useReviews } from '../context/ReviewsContext';
-import { colors, fonts } from '../theme';
+import { useThemedStyles } from '../hooks/useThemedStyles';
 
 export function BusinessScreen({ navigation }) {
   const { business, reviews, unreadNegativeCount } = useReviews();
+  const styles = useThemedStyles(createStyles);
 
   if (!business) return null;
 
@@ -63,89 +64,91 @@ export function BusinessScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-    paddingHorizontal: 20,
-    paddingTop: 8,
-  },
-  title: {
-    color: colors.text,
-    fontSize: 28,
-    fontFamily: fonts.display,
-    letterSpacing: -0.5,
-    marginBottom: 16,
-  },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: 14,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: colors.surfaceAlt,
-    marginBottom: 16,
-  },
-  name: {
-    color: colors.text,
-    fontSize: 22,
-    fontFamily: fonts.sansBold,
-    marginBottom: 6,
-  },
-  address: {
-    color: colors.textMuted,
-    fontSize: 15,
-    marginBottom: 14,
-    fontFamily: fonts.sans,
-  },
-  ratingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  ratingText: {
-    color: colors.textMuted,
-    fontSize: 14,
-    fontFamily: fonts.sansSemiBold,
-  },
-  stats: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  stat: {
-    width: '47%',
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.surfaceAlt,
-  },
-  statAlert: {
-    borderColor: colors.dangerBorder,
-    backgroundColor: '#1c1212',
-  },
-  statValue: {
-    color: colors.text,
-    fontSize: 28,
-    fontFamily: fonts.sansBold,
-    marginBottom: 4,
-  },
-  statValueAlert: {
-    color: '#fecaca',
-  },
-  statLabel: {
-    color: colors.textDim,
-    fontSize: 13,
-    fontFamily: fonts.sans,
-  },
-  note: {
-    marginTop: 24,
-    color: colors.textDim,
-    fontSize: 13,
-    lineHeight: 20,
-    fontFamily: fonts.sans,
-  },
-  legal: {
-    marginTop: 28,
-  },
-});
+function createStyles(colors, fonts) {
+  return {
+    container: {
+      flex: 1,
+      backgroundColor: colors.bg,
+      paddingHorizontal: 20,
+      paddingTop: 8,
+    },
+    title: {
+      color: colors.text,
+      fontSize: 28,
+      fontFamily: fonts.display,
+      letterSpacing: -0.5,
+      marginBottom: 16,
+    },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: 14,
+      padding: 20,
+      borderWidth: 1,
+      borderColor: colors.surfaceAlt,
+      marginBottom: 16,
+    },
+    name: {
+      color: colors.text,
+      fontSize: 22,
+      fontFamily: fonts.sansBold,
+      marginBottom: 6,
+    },
+    address: {
+      color: colors.textMuted,
+      fontSize: 15,
+      marginBottom: 14,
+      fontFamily: fonts.sans,
+    },
+    ratingRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+    },
+    ratingText: {
+      color: colors.textMuted,
+      fontSize: 14,
+      fontFamily: fonts.sansSemiBold,
+    },
+    stats: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 10,
+    },
+    stat: {
+      width: '47%',
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: colors.surfaceAlt,
+    },
+    statAlert: {
+      borderColor: colors.dangerBorder,
+      backgroundColor: colors.dangerSoft,
+    },
+    statValue: {
+      color: colors.text,
+      fontSize: 28,
+      fontFamily: fonts.sansBold,
+      marginBottom: 4,
+    },
+    statValueAlert: {
+      color: colors.dangerText,
+    },
+    statLabel: {
+      color: colors.textDim,
+      fontSize: 13,
+      fontFamily: fonts.sans,
+    },
+    note: {
+      marginTop: 24,
+      color: colors.textDim,
+      fontSize: 13,
+      lineHeight: 20,
+      fontFamily: fonts.sans,
+    },
+    legal: {
+      marginTop: 28,
+    },
+  };
+}

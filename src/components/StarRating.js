@@ -1,7 +1,11 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { colors } from '../theme';
+import { Text, View } from 'react-native';
+import { useTheme } from '../context/ThemeContext';
+import { useThemedStyles } from '../hooks/useThemedStyles';
 
 export function StarRating({ rating, size = 14 }) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   const stars = [1, 2, 3, 4, 5].map((n) => (
     <Text
       key={n}
@@ -17,13 +21,15 @@ export function StarRating({ rating, size = 14 }) {
   return <View style={styles.row}>{stars}</View>;
 }
 
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 1,
-  },
-  star: {
-    lineHeight: 18,
-  },
-});
+function createStyles() {
+  return {
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 1,
+    },
+    star: {
+      lineHeight: 18,
+    },
+  };
+}

@@ -2,13 +2,12 @@ import { useMemo, useState } from 'react';
 import {
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useReviews } from '../context/ReviewsContext';
-import { colors, fonts } from '../theme';
+import { useThemedStyles } from '../hooks/useThemedStyles';
 import {
   SOURCES,
   buildRatingTrend,
@@ -20,6 +19,7 @@ import {
 
 export function AnalyticsScreen() {
   const { reviews, business } = useReviews();
+  const styles = useThemedStyles(createStyles);
   const [granularity, setGranularity] = useState('week');
 
   const ratingTrend = useMemo(
@@ -131,6 +131,7 @@ export function AnalyticsScreen() {
 }
 
 function SourceLegend() {
+  const styles = useThemedStyles(createStyles);
   return (
     <View style={styles.legend}>
       {SOURCES.map((s) => (
@@ -145,6 +146,7 @@ function SourceLegend() {
 
 // Pure View line chart — no react-native-svg dependency.
 function RatingTrendChart({ data }) {
+  const styles = useThemedStyles(createStyles);
   const [width, setWidth] = useState(0);
   const height = 160;
   const padX = 10;
@@ -259,6 +261,7 @@ function RatingTrendChart({ data }) {
 }
 
 function VolumeChart({ data }) {
+  const styles = useThemedStyles(createStyles);
   const max = Math.max(1, ...data.map((d) => d.total));
   const trackHeight = 140;
 
@@ -299,6 +302,7 @@ function VolumeChart({ data }) {
 }
 
 function SourceBreakdown({ bars }) {
+  const styles = useThemedStyles(createStyles);
   return (
     <View style={styles.chartCard}>
       {bars.map((b) => (
@@ -327,7 +331,8 @@ function SourceBreakdown({ bars }) {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors, fonts) {
+  return {
   container: {
     flex: 1,
     backgroundColor: colors.bg,
@@ -378,7 +383,7 @@ const styles = StyleSheet.create({
     borderRadius: 9,
   },
   toggleBtnActive: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.pillActiveBg,
   },
   toggleText: {
     color: colors.textMuted,
@@ -386,7 +391,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sansSemiBold,
   },
   toggleTextActive: {
-    color: '#0b0c0e',
+    color: colors.pillActiveText,
   },
   section: {
     marginBottom: 36,
@@ -591,4 +596,5 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 4,
   },
-});
+  };
+}

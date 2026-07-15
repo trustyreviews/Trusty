@@ -1,15 +1,19 @@
 import { Feather } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useDemo } from '../context/DemoContext';
 import { useReviews } from '../context/ReviewsContext';
+import { useTheme } from '../context/ThemeContext';
 import { useUser } from '../context/UserContext';
-import { colors, fonts } from '../theme';
+import { useThemedStyles } from '../hooks/useThemedStyles';
 
 // Custom left navigation rail (rendered as the tab bar via tabBarPosition="left").
 export function Sidebar({ state, navigation }) {
   const insets = useSafeAreaInsets();
-  const { unreadNegativeCount } = useReviews();
+  const { unreadNegativeCount, business } = useReviews();
+  const { demoActive } = useDemo();
   const { initials } = useUser();
+  const styles = useThemedStyles(createStyles);
 
   const activeRoute = state.routes[state.index]?.name;
 
@@ -36,8 +40,17 @@ export function Sidebar({ state, navigation }) {
 
   return (
     <View style={[styles.rail, { paddingTop: insets.top + 14, paddingBottom: insets.bottom + 14 }]}>
-      <View style={styles.logo}>
-        <Feather name="coffee" size={20} color="#1a1c20" />
+      <View style={styles.logoBlock}>
+        <View style={styles.logo}>
+          <Feather name="coffee" size={20} color="#1a1c20" />
+        </View>
+        {demoActive ? (
+          <View style={styles.demoBadge} accessibilityLabel="Demo mode">
+            <Text style={styles.demoBadgeText} numberOfLines={2}>
+              Demo
+            </Text>
+          </View>
+        ) : null}
       </View>
 
       <View style={styles.nav}>
@@ -64,6 +77,12 @@ export function Sidebar({ state, navigation }) {
         />
       </View>
 
+      {demoActive && business?.name ? (
+        <Text style={styles.demoBiz} numberOfLines={3}>
+          {business.name}
+        </Text>
+      ) : null}
+
       <Pressable
         onPress={openProfile}
         style={({ pressed }) => [styles.avatar, pressed && styles.avatarPressed]}
@@ -77,6 +96,9 @@ export function Sidebar({ state, navigation }) {
 }
 
 function RailButton({ icon, active, disabled, badge, onPress }) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   return (
     <Pressable
       onPress={onPress}
@@ -97,67 +119,97 @@ function RailButton({ icon, active, disabled, badge, onPress }) {
   );
 }
 
-const styles = StyleSheet.create({
-  rail: {
-    width: 68,
-    backgroundColor: colors.sidebar,
-    borderRightWidth: 1,
-    borderRightColor: colors.hairline,
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-  },
-  logo: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: '#e7e5e1',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 28,
-  },
-  nav: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 8,
-  },
-  railBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  railBtnActive: {
-    backgroundColor: colors.surfaceAlt,
-  },
-  railBtnPressed: {
-    backgroundColor: colors.surface,
-  },
-  badge: {
-    position: 'absolute',
-    top: 9,
-    right: 9,
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: colors.danger,
-    borderWidth: 1.5,
-    borderColor: colors.sidebar,
-  },
-  avatar: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: colors.avatar,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarPressed: {
-    opacity: 0.7,
-  },
-  avatarText: {
-    color: colors.textMuted,
-    fontSize: 12,
-    fontFamily: fonts.sansBold,
-  },
-});
+function createStyles(colors, fonts) {
+  return {
+    rail: {
+      width: 68,
+      backgroundColor: colors.sidebar,
+      borderRightWidth: 1,
+      borderRightColor: colors.hairline,
+      alignItems: 'center',
+      justifyContent: 'flex-start',
+    },
+    logo: {
+      width: 40,
+      height: 40,
+      borderRadius: 12,
+      backgroundColor: '#e7e5e1',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    logoBlock: {
+      alignItems: 'center',
+      gap: 8,
+      marginBottom: 20,
+    },
+    demoBadge: {
+      backgroundColor: colors.accentSoft,
+      borderWidth: 1,
+      borderColor: colors.accent,
+      borderRadius: 999,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+    },
+    demoBadgeText: {
+      color: colors.accent,
+      fontSize: 10,
+      fontFamily: fonts.sansBold,
+      letterSpacing: 0.6,
+      textTransform: 'uppercase',
+    },
+    demoBiz: {
+      color: colors.textDim,
+      fontSize: 9,
+      fontFamily: fonts.sansMedium,
+      textAlign: 'center',
+      lineHeight: 12,
+      paddingHorizontal: 6,
+      marginBottom: 10,
+    },
+    nav: {
+      flex: 1,
+      alignItems: 'center',
+      gap: 8,
+    },
+    railBtn: {
+      width: 44,
+      height: 44,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    railBtnActive: {
+      backgroundColor: colors.surfaceAlt,
+    },
+    railBtnPressed: {
+      backgroundColor: colors.surface,
+    },
+    badge: {
+      position: 'absolute',
+      top: 9,
+      right: 9,
+      width: 7,
+      height: 7,
+      borderRadius: 4,
+      backgroundColor: colors.danger,
+      borderWidth: 1.5,
+      borderColor: colors.sidebar,
+    },
+    avatar: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      backgroundColor: colors.avatar,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    avatarPressed: {
+      opacity: 0.7,
+    },
+    avatarText: {
+      color: colors.textMuted,
+      fontSize: 12,
+      fontFamily: fonts.sansBold,
+    },
+  };
+}

@@ -1,29 +1,32 @@
 import { Feather } from '@expo/vector-icons';
+import { useEffect, useRef } from 'react';
 import {
   Alert,
   Pressable,
   ScrollView,
-  StyleSheet,
   Switch,
   Text,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COMPANY } from '../config/company';
+import { useDemo } from '../context/DemoContext';
 import { useReviews } from '../context/ReviewsContext';
 import { useSettings } from '../context/SettingsContext';
-import { colors, fonts } from '../theme';
-import { suggestDraft } from '../utils/reviewHelpers';
-
-const TONE_EXAMPLE_CASES = [
-  { label: 'Positive review', rating: 5 },
-  { label: 'Mixed review', rating: 3 },
-  { label: 'Negative review', rating: 1 },
-];
+import { useTheme } from '../context/ThemeContext';
+import { useThemedStyles } from '../hooks/useThemedStyles';
 
 export function SettingsScreen({ navigation }) {
-  const { business, disconnectBusiness, deleteAllData } = useReviews();
-  const businessName = business?.name ?? 'Riverside Coffee Co.';
+  const {
+    business,
+    disconnectBusiness,
+    deleteAllData,
+    syncFacebookReviews,
+    disconnectFacebook,
+    syncingFacebook,
+    facebookConnected,
+  } = useReviews();
+  const { demoActive, resetDemo } = useDemo();
   const {
     notifications,
     updateNotifications,
@@ -35,8 +38,71 @@ export function SettingsScreen({ navigation }) {
     cancelSubscription,
     resetSettings,
   } = useSettings();
+  const { colors, themeId, setThemeId, themes } = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const facebookSyncedRef = useRef(false);
+
+  useEffect(() => {
+    const fb = accounts.find((a) => a.id === 'facebook');
+    if (!fb?.connected || facebookSyncedRef.current) return;
+    facebookSyncedRef.current = true;
+    syncFacebookReviews().catch(() => {
+      facebookSyncedRef.current = false;
+    });
+  }, [accounts, syncFacebookReviews]);
 
   const confirmDisconnectAccount = (account) => {
+    if (account.id === 'facebook' && !account.connected) {
+      Alert.alert(
+        'Connect Facebook?',
+        'Trusty will fetch reviews from your Facebook Page (Trusty Inc.).',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: syncingFacebook ? 'Connecting…' : 'Connect',
+            onPress: async () => {
+              try {
+                const count = await syncFacebookReviews();
+                toggleAccount('facebook');
+                Alert.alert(
+                  'Facebook connected',
+                  count > 0
+                    ? `Loaded ${count} Facebook review${count === 1 ? '' : 's'}.`
+                    : 'Connected — your Page has no Facebook reviews yet.'
+                );
+              } catch (error) {
+                Alert.alert(
+                  'Facebook sync failed',
+                  error?.message ||
+                    'Check that npm run api is running and EXPO_PUBLIC_API_BASE_URL is set.'
+                );
+              }
+            },
+          },
+        ]
+      );
+      return;
+    }
+
+    if (account.id === 'facebook' && account.connected) {
+      Alert.alert(
+        'Disconnect Facebook?',
+        'Trusty will stop syncing Facebook reviews. Existing Facebook reviews will be removed from the inbox.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Disconnect',
+            style: 'destructive',
+            onPress: () => {
+              disconnectFacebook();
+              toggleAccount('facebook');
+            },
+          },
+        ]
+      );
+      return;
+    }
+
     const action = account.connected ? 'Disconnect' : 'Connect';
     Alert.alert(
       `${action} ${account.label}?`,
@@ -108,6 +174,20 @@ export function SettingsScreen({ navigation }) {
     );
   };
 
+  const confirmResetDemo = () => {
+    Alert.alert(
+      'Reset demo?',
+      'Restores Riverside Coffee Co. sample reviews and restarts the guided walkthrough.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Reset demo',
+          onPress: () => resetDemo(),
+        },
+      ]
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView
@@ -150,31 +230,84 @@ export function SettingsScreen({ navigation }) {
                 <Text
                   style={[
                     styles.accountStatus,
-                    account.connected && styles.accountStatusOn,
+                    (account.connected || (account.id === 'facebook' && facebookConnected)) &&
+                      styles.accountStatusOn,
                   ]}
                 >
-                  {account.connected ? 'Connected' : 'Not connected'}
+                  {account.connected || (account.id === 'facebook' && facebookConnected)
+                    ? 'Connected'
+                    : 'Not connected'}
                 </Text>
               </View>
               <Pressable
                 style={({ pressed }) => [
-                  account.connected ? styles.ghostBtn : styles.primaryBtn,
+                  account.connected || (account.id === 'facebook' && facebookConnected)
+                    ? styles.ghostBtn
+                    : styles.primaryBtn,
                   pressed && styles.pressed,
                 ]}
                 onPress={() => confirmDisconnectAccount(account)}
               >
                 <Text
                   style={
-                    account.connected
+                    account.connected || (account.id === 'facebook' && facebookConnected)
                       ? styles.ghostBtnText
                       : styles.primaryBtnText
                   }
                 >
-                  {account.connected ? 'Disconnect' : 'Connect'}
+                  {account.connected || (account.id === 'facebook' && facebookConnected)
+                    ? 'Disconnect'
+                    : 'Connect'}
                 </Text>
               </Pressable>
             </View>
           ))}
+        </Section>
+
+        {/* Appearance */}
+        <Section
+          title="Appearance"
+          hint="Choose a color theme for Trusty. Your pick stays on this device."
+        >
+          {themes.map((theme) => {
+            const active = themeId === theme.id;
+            return (
+              <Pressable
+                key={theme.id}
+                onPress={() => setThemeId(theme.id)}
+                style={({ pressed }) => [
+                  styles.themeRow,
+                  active && styles.themeRowActive,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <View
+                  style={[styles.themeSwatch, { backgroundColor: theme.accent }]}
+                />
+                <View style={styles.themeMeta}>
+                  <Text style={styles.themeLabel}>{theme.label}</Text>
+                  <Text style={styles.themeHint}>{theme.hint}</Text>
+                </View>
+                {active ? (
+                  <Feather name="check" size={16} color={colors.accent} />
+                ) : null}
+              </Pressable>
+            );
+          })}
+        </Section>
+
+        {/* Website widget */}
+        <Section
+          title="Website widget"
+          hint="Embed a reviews carousel on your own site."
+        >
+          <Pressable
+            style={({ pressed }) => [styles.linkRow, pressed && styles.pressed]}
+            onPress={() => navigation.navigate('WidgetCode')}
+          >
+            <Text style={styles.linkRowText}>Get your widget code</Text>
+            <Feather name="chevron-right" size={16} color={colors.textDim} />
+          </Pressable>
         </Section>
 
         {/* Notifications */}
@@ -256,29 +389,16 @@ export function SettingsScreen({ navigation }) {
 
           <View style={styles.examplesCard}>
             <Text style={styles.examplesTitle}>
-              {tone === 'formal' ? 'Formal' : 'Casual'} examples
+              {tone === 'formal' ? 'Formal' : 'Casual'} for AI drafts
             </Text>
             <Text style={styles.examplesHint}>
-              How a first draft looks for each kind of review
+              {tone === 'formal'
+                ? 'AI replies will sound polished and professional — think “Dear…”, “We sincerely…”, fewer contractions.'
+                : 'AI replies will sound warm and conversational — think “Hi…”, first names, natural phrasing.'}
             </Text>
-            {TONE_EXAMPLE_CASES.map((example, index) => (
-              <View
-                key={example.rating}
-                style={[
-                  styles.exampleBlock,
-                  index === TONE_EXAMPLE_CASES.length - 1 && styles.exampleBlockLast,
-                ]}
-              >
-                <Text style={styles.exampleLabel}>{example.label}</Text>
-                <Text style={styles.exampleBody}>
-                  {suggestDraft(
-                    { authorName: 'Priya Nair', rating: example.rating },
-                    businessName,
-                    tone
-                  )}
-                </Text>
-              </View>
-            ))}
+            <Text style={[styles.examplesHint, { marginTop: 8 }]}>
+              Replies are written by you or Draft/Optimize with AI — never from canned templates.
+            </Text>
           </View>
         </Section>
 
@@ -311,6 +431,29 @@ export function SettingsScreen({ navigation }) {
             </Pressable>
           </View>
         </Section>
+
+        {demoActive ? (
+          <Section
+            title="Demo"
+            hint="You’re exploring sample Riverside Coffee Co. data."
+          >
+            <View style={styles.card}>
+              <Text style={styles.cardLabel}>Guided walkthrough</Text>
+              <Text style={styles.cardMeta}>
+                Reset restores the original reviews and checklist progress.
+              </Text>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.secondaryBtn,
+                  pressed && styles.pressed,
+                ]}
+                onPress={confirmResetDemo}
+              >
+                <Text style={styles.secondaryBtnText}>Reset demo</Text>
+              </Pressable>
+            </View>
+          </Section>
+        ) : null}
 
         {/* Data / privacy */}
         <Section
@@ -356,6 +499,7 @@ export function SettingsScreen({ navigation }) {
 }
 
 function Section({ title, hint, children }) {
+  const styles = useThemedStyles(createStyles);
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
@@ -366,6 +510,8 @@ function Section({ title, hint, children }) {
 }
 
 function ToggleRow({ label, value, onValueChange, last }) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   return (
     <View style={[styles.toggleRow, last && styles.toggleRowLast]}>
       <Text style={styles.toggleLabel}>{label}</Text>
@@ -379,313 +525,350 @@ function ToggleRow({ label, value, onValueChange, last }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
-  scroll: {
-    flex: 1,
-  },
-  content: {
-    width: '100%',
-    maxWidth: 880,
-    alignSelf: 'center',
-    paddingHorizontal: 40,
-    paddingBottom: 56,
-  },
-  header: {
-    paddingTop: 24,
-    marginBottom: 28,
-  },
-  eyebrow: {
-    color: colors.textDim,
-    fontSize: 12,
-    fontFamily: fonts.sansSemiBold,
-    letterSpacing: 1.5,
-    marginBottom: 8,
-  },
-  title: {
-    color: colors.text,
-    fontSize: 44,
-    fontFamily: fonts.display,
-    letterSpacing: -1,
-  },
-  section: {
-    marginBottom: 36,
-  },
-  sectionTitle: {
-    color: colors.text,
-    fontSize: 20,
-    fontFamily: fonts.sansSemiBold,
-    marginBottom: 6,
-  },
-  sectionHint: {
-    color: colors.textDim,
-    fontSize: 14,
-    fontFamily: fonts.sans,
-    lineHeight: 20,
-    marginBottom: 14,
-  },
-  subheading: {
-    color: colors.textMuted,
-    fontSize: 12,
-    fontFamily: fonts.sansSemiBold,
-    letterSpacing: 0.4,
-    textTransform: 'uppercase',
-    marginBottom: 10,
-    marginTop: 4,
-  },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: 14,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: 10,
-  },
-  cardLabel: {
-    color: colors.textDim,
-    fontSize: 12,
-    fontFamily: fonts.sansSemiBold,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 6,
-  },
-  cardValue: {
-    color: colors.text,
-    fontSize: 20,
-    fontFamily: fonts.sansSemiBold,
-  },
-  cardMeta: {
-    color: colors.textMuted,
-    fontSize: 14,
-    fontFamily: fonts.sans,
-    marginTop: 6,
-  },
-  accountRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-    backgroundColor: colors.surface,
-    borderRadius: 14,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: 8,
-  },
-  accountMeta: {
-    flex: 1,
-  },
-  accountName: {
-    color: colors.text,
-    fontSize: 15,
-    fontFamily: fonts.sansSemiBold,
-    marginBottom: 3,
-  },
-  accountStatus: {
-    color: colors.textDim,
-    fontSize: 13,
-    fontFamily: fonts.sans,
-  },
-  accountStatusOn: {
-    color: colors.accent,
-  },
-  toggleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.hairline,
-  },
-  toggleRowLast: {
-    borderBottomWidth: 0,
-    paddingBottom: 0,
-  },
-  toggleLabel: {
-    color: colors.text,
-    fontSize: 15,
-    fontFamily: fonts.sansMedium,
-  },
-  segment: {
-    flexDirection: 'row',
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: 4,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: 14,
-  },
-  segmentBtn: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 9,
-    alignItems: 'center',
-  },
-  segmentBtnActive: {
-    backgroundColor: colors.white,
-  },
-  segmentText: {
-    color: colors.textMuted,
-    fontSize: 13,
-    fontFamily: fonts.sansSemiBold,
-  },
-  segmentTextActive: {
-    color: '#0b0c0e',
-  },
-  examplesCard: {
-    backgroundColor: colors.surface,
-    borderRadius: 14,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: 14,
-  },
-  examplesTitle: {
-    color: colors.text,
-    fontSize: 15,
-    fontFamily: fonts.sansSemiBold,
-    marginBottom: 4,
-  },
-  examplesHint: {
-    color: colors.textDim,
-    fontSize: 13,
-    fontFamily: fonts.sans,
-    marginBottom: 14,
-  },
-  exampleBlock: {
-    marginBottom: 14,
-    paddingBottom: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.hairline,
-  },
-  exampleBlockLast: {
-    marginBottom: 0,
-    paddingBottom: 0,
-    borderBottomWidth: 0,
-  },
-  exampleLabel: {
-    color: colors.accent,
-    fontSize: 11,
-    fontFamily: fonts.sansBold,
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-    marginBottom: 6,
-  },
-  exampleBody: {
-    color: colors.textMuted,
-    fontSize: 14,
-    fontFamily: fonts.sans,
-    lineHeight: 21,
-  },
-  planRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 4,
-  },
-  price: {
-    color: colors.text,
-    fontSize: 18,
-    fontFamily: fonts.sansBold,
-  },
-  primaryBtn: {
-    backgroundColor: colors.white,
-    paddingVertical: 9,
-    paddingHorizontal: 14,
-    borderRadius: 10,
-  },
-  primaryBtnText: {
-    color: '#0b0c0e',
-    fontSize: 13,
-    fontFamily: fonts.sansBold,
-  },
-  ghostBtn: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingVertical: 9,
-    paddingHorizontal: 14,
-    borderRadius: 10,
-  },
-  ghostBtnText: {
-    color: colors.textMuted,
-    fontSize: 13,
-    fontFamily: fonts.sansSemiBold,
-  },
-  secondaryBtn: {
-    marginTop: 14,
-    alignSelf: 'flex-start',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingVertical: 8,
-  },
-  secondaryBtnText: {
-    color: colors.textMuted,
-    fontSize: 14,
-    fontFamily: fonts.sansSemiBold,
-  },
-  dangerGhostBtn: {
-    marginTop: 14,
-    alignSelf: 'flex-start',
-    paddingVertical: 8,
-  },
-  dangerGhostText: {
-    color: colors.dangerText,
-    fontSize: 14,
-    fontFamily: fonts.sansSemiBold,
-  },
-  linkRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    marginBottom: 8,
-  },
-  linkRowText: {
-    color: colors.text,
-    fontSize: 15,
-    fontFamily: fonts.sansMedium,
-  },
-  dangerCard: {
-    marginTop: 8,
-    borderColor: colors.dangerBorder,
-    backgroundColor: colors.dangerSoft,
-  },
-  dangerTitle: {
-    color: colors.dangerText,
-    fontSize: 16,
-    fontFamily: fonts.sansSemiBold,
-    marginBottom: 6,
-  },
-  dangerBody: {
-    color: colors.textMuted,
-    fontSize: 13,
-    fontFamily: fonts.sans,
-    lineHeight: 20,
-    marginBottom: 14,
-  },
-  dangerBtn: {
-    alignSelf: 'flex-start',
-    backgroundColor: colors.danger,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 10,
-  },
-  dangerBtnText: {
-    color: colors.white,
-    fontSize: 13,
-    fontFamily: fonts.sansBold,
-  },
-  pressed: {
-    opacity: 0.7,
-  },
-});
+function createStyles(colors, fonts) {
+  return {
+    container: {
+      flex: 1,
+      backgroundColor: colors.bg,
+    },
+    scroll: {
+      flex: 1,
+    },
+    content: {
+      width: '100%',
+      maxWidth: 880,
+      alignSelf: 'center',
+      paddingHorizontal: 40,
+      paddingBottom: 56,
+    },
+    header: {
+      paddingTop: 24,
+      marginBottom: 28,
+    },
+    eyebrow: {
+      color: colors.textDim,
+      fontSize: 12,
+      fontFamily: fonts.sansSemiBold,
+      letterSpacing: 1.5,
+      marginBottom: 8,
+    },
+    title: {
+      color: colors.text,
+      fontSize: 44,
+      fontFamily: fonts.display,
+      letterSpacing: -1,
+    },
+    section: {
+      marginBottom: 36,
+    },
+    sectionTitle: {
+      color: colors.text,
+      fontSize: 20,
+      fontFamily: fonts.sansSemiBold,
+      marginBottom: 6,
+    },
+    sectionHint: {
+      color: colors.textDim,
+      fontSize: 14,
+      fontFamily: fonts.sans,
+      lineHeight: 20,
+      marginBottom: 14,
+    },
+    subheading: {
+      color: colors.textMuted,
+      fontSize: 12,
+      fontFamily: fonts.sansSemiBold,
+      letterSpacing: 0.4,
+      textTransform: 'uppercase',
+      marginBottom: 10,
+      marginTop: 4,
+    },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: 14,
+      padding: 18,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginBottom: 10,
+    },
+    cardLabel: {
+      color: colors.textDim,
+      fontSize: 12,
+      fontFamily: fonts.sansSemiBold,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+      marginBottom: 6,
+    },
+    cardValue: {
+      color: colors.text,
+      fontSize: 20,
+      fontFamily: fonts.sansSemiBold,
+    },
+    cardMeta: {
+      color: colors.textMuted,
+      fontSize: 14,
+      fontFamily: fonts.sans,
+      marginTop: 6,
+    },
+    accountRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 12,
+      backgroundColor: colors.surface,
+      borderRadius: 14,
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginBottom: 8,
+    },
+    accountMeta: {
+      flex: 1,
+    },
+    accountName: {
+      color: colors.text,
+      fontSize: 15,
+      fontFamily: fonts.sansSemiBold,
+      marginBottom: 3,
+    },
+    accountStatus: {
+      color: colors.textDim,
+      fontSize: 13,
+      fontFamily: fonts.sans,
+    },
+    accountStatusOn: {
+      color: colors.accent,
+    },
+    themeRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 14,
+      backgroundColor: colors.surface,
+      borderRadius: 14,
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginBottom: 8,
+    },
+    themeRowActive: {
+      borderColor: colors.accent,
+      backgroundColor: colors.accentSoft,
+    },
+    themeSwatch: {
+      width: 28,
+      height: 28,
+      borderRadius: 8,
+    },
+    themeMeta: {
+      flex: 1,
+    },
+    themeLabel: {
+      color: colors.text,
+      fontSize: 15,
+      fontFamily: fonts.sansSemiBold,
+      marginBottom: 2,
+    },
+    themeHint: {
+      color: colors.textDim,
+      fontSize: 13,
+      fontFamily: fonts.sans,
+    },
+    toggleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 10,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.hairline,
+    },
+    toggleRowLast: {
+      borderBottomWidth: 0,
+      paddingBottom: 0,
+    },
+    toggleLabel: {
+      color: colors.text,
+      fontSize: 15,
+      fontFamily: fonts.sansMedium,
+    },
+    segment: {
+      flexDirection: 'row',
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: 4,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginBottom: 14,
+    },
+    segmentBtn: {
+      flex: 1,
+      paddingVertical: 10,
+      borderRadius: 9,
+      alignItems: 'center',
+    },
+    segmentBtnActive: {
+      backgroundColor: colors.pillActiveBg,
+    },
+    segmentText: {
+      color: colors.textMuted,
+      fontSize: 13,
+      fontFamily: fonts.sansSemiBold,
+    },
+    segmentTextActive: {
+      color: colors.pillActiveText,
+    },
+    examplesCard: {
+      backgroundColor: colors.surface,
+      borderRadius: 14,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginBottom: 14,
+    },
+    examplesTitle: {
+      color: colors.text,
+      fontSize: 15,
+      fontFamily: fonts.sansSemiBold,
+      marginBottom: 4,
+    },
+    examplesHint: {
+      color: colors.textDim,
+      fontSize: 13,
+      fontFamily: fonts.sans,
+      marginBottom: 14,
+    },
+    exampleBlock: {
+      marginBottom: 14,
+      paddingBottom: 14,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.hairline,
+    },
+    exampleBlockLast: {
+      marginBottom: 0,
+      paddingBottom: 0,
+      borderBottomWidth: 0,
+    },
+    exampleLabel: {
+      color: colors.accent,
+      fontSize: 11,
+      fontFamily: fonts.sansBold,
+      textTransform: 'uppercase',
+      letterSpacing: 0.6,
+      marginBottom: 6,
+    },
+    exampleBody: {
+      color: colors.textMuted,
+      fontSize: 14,
+      fontFamily: fonts.sans,
+      lineHeight: 21,
+    },
+    planRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      marginBottom: 4,
+    },
+    price: {
+      color: colors.text,
+      fontSize: 18,
+      fontFamily: fonts.sansBold,
+    },
+    primaryBtn: {
+      backgroundColor: colors.pillActiveBg,
+      paddingVertical: 9,
+      paddingHorizontal: 14,
+      borderRadius: 10,
+    },
+    primaryBtnText: {
+      color: colors.pillActiveText,
+      fontSize: 13,
+      fontFamily: fonts.sansBold,
+    },
+    ghostBtn: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingVertical: 9,
+      paddingHorizontal: 14,
+      borderRadius: 10,
+    },
+    ghostBtnText: {
+      color: colors.textMuted,
+      fontSize: 13,
+      fontFamily: fonts.sansSemiBold,
+    },
+    secondaryBtn: {
+      marginTop: 14,
+      alignSelf: 'flex-start',
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingVertical: 8,
+    },
+    secondaryBtnText: {
+      color: colors.textMuted,
+      fontSize: 14,
+      fontFamily: fonts.sansSemiBold,
+    },
+    dangerGhostBtn: {
+      marginTop: 14,
+      alignSelf: 'flex-start',
+      paddingVertical: 8,
+    },
+    dangerGhostText: {
+      color: colors.dangerText,
+      fontSize: 14,
+      fontFamily: fonts.sansSemiBold,
+    },
+    linkRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      marginBottom: 8,
+    },
+    linkRowText: {
+      color: colors.text,
+      fontSize: 15,
+      fontFamily: fonts.sansMedium,
+    },
+    dangerCard: {
+      marginTop: 8,
+      borderColor: colors.dangerBorder,
+      backgroundColor: colors.dangerSoft,
+    },
+    dangerTitle: {
+      color: colors.dangerText,
+      fontSize: 16,
+      fontFamily: fonts.sansSemiBold,
+      marginBottom: 6,
+    },
+    dangerBody: {
+      color: colors.textMuted,
+      fontSize: 13,
+      fontFamily: fonts.sans,
+      lineHeight: 20,
+      marginBottom: 14,
+    },
+    dangerBtn: {
+      alignSelf: 'flex-start',
+      backgroundColor: colors.danger,
+      paddingVertical: 10,
+      paddingHorizontal: 14,
+      borderRadius: 10,
+    },
+    dangerBtnText: {
+      color: colors.white,
+      fontSize: 13,
+      fontFamily: fonts.sansBold,
+    },
+    pressed: {
+      opacity: 0.7,
+    },
+  };
+}

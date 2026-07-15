@@ -4,18 +4,20 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
 import { StarRating } from '../components/StarRating';
 import { useReviews } from '../context/ReviewsContext';
-import { colors, fonts } from '../theme';
+import { useTheme } from '../context/ThemeContext';
+import { useThemedStyles } from '../hooks/useThemedStyles';
 
 export function ReviewDetailScreen({ route, navigation }) {
   const { reviewId } = route.params;
   const { reviews, replyToReview } = useReviews();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const review = useMemo(
     () => reviews.find((r) => r.id === reviewId),
     [reviews, reviewId]
@@ -107,117 +109,119 @@ export function ReviewDetailScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
-  content: {
-    padding: 20,
-    paddingBottom: 40,
-  },
-  missing: {
-    flex: 1,
-    backgroundColor: colors.bg,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  missingText: {
-    color: colors.textMuted,
-    fontFamily: fonts.sans,
-  },
-  alertBanner: {
-    backgroundColor: colors.dangerSoft,
-    borderColor: colors.dangerBorder,
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 16,
-  },
-  alertBannerText: {
-    color: '#fecaca',
-    fontSize: 14,
-    fontFamily: fonts.sansSemiBold,
-  },
-  author: {
-    color: colors.text,
-    fontSize: 24,
-    fontFamily: fonts.sansBold,
-    marginBottom: 8,
-  },
-  meta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 16,
-  },
-  date: {
-    color: colors.textDim,
-    fontSize: 14,
-    fontFamily: fonts.sans,
-  },
-  body: {
-    color: colors.textMuted,
-    fontSize: 16,
-    lineHeight: 24,
-    marginBottom: 24,
-    fontFamily: fonts.sans,
-  },
-  existingReply: {
-    backgroundColor: colors.surface,
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 24,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.accent,
-  },
-  existingLabel: {
-    color: colors.accent,
-    fontSize: 12,
-    fontFamily: fonts.sansBold,
-    textTransform: 'uppercase',
-    marginBottom: 6,
-  },
-  existingText: {
-    color: colors.textMuted,
-    fontSize: 15,
-    lineHeight: 22,
-    fontFamily: fonts.sans,
-  },
-  replyLabel: {
-    color: colors.text,
-    fontSize: 16,
-    fontFamily: fonts.sansSemiBold,
-    marginBottom: 10,
-  },
-  input: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.surfaceAlt,
-    borderRadius: 12,
-    color: colors.text,
-    fontSize: 16,
-    lineHeight: 22,
-    minHeight: 140,
-    padding: 14,
-    marginBottom: 16,
-    fontFamily: fonts.sans,
-  },
-  submit: {
-    backgroundColor: colors.accent,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  submitDisabled: {
-    opacity: 0.4,
-  },
-  submitPressed: {
-    opacity: 0.9,
-  },
-  submitText: {
-    color: colors.white,
-    fontSize: 16,
-    fontFamily: fonts.sansBold,
-  },
-});
+function createStyles(colors, fonts) {
+  return {
+    container: {
+      flex: 1,
+      backgroundColor: colors.bg,
+    },
+    content: {
+      padding: 20,
+      paddingBottom: 40,
+    },
+    missing: {
+      flex: 1,
+      backgroundColor: colors.bg,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    missingText: {
+      color: colors.textMuted,
+      fontFamily: fonts.sans,
+    },
+    alertBanner: {
+      backgroundColor: colors.dangerSoft,
+      borderColor: colors.dangerBorder,
+      borderWidth: 1,
+      borderRadius: 10,
+      padding: 12,
+      marginBottom: 16,
+    },
+    alertBannerText: {
+      color: colors.dangerText,
+      fontSize: 14,
+      fontFamily: fonts.sansSemiBold,
+    },
+    author: {
+      color: colors.text,
+      fontSize: 24,
+      fontFamily: fonts.sansBold,
+      marginBottom: 8,
+    },
+    meta: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      marginBottom: 16,
+    },
+    date: {
+      color: colors.textDim,
+      fontSize: 14,
+      fontFamily: fonts.sans,
+    },
+    body: {
+      color: colors.textMuted,
+      fontSize: 16,
+      lineHeight: 24,
+      marginBottom: 24,
+      fontFamily: fonts.sans,
+    },
+    existingReply: {
+      backgroundColor: colors.surface,
+      borderRadius: 10,
+      padding: 14,
+      marginBottom: 24,
+      borderLeftWidth: 3,
+      borderLeftColor: colors.accent,
+    },
+    existingLabel: {
+      color: colors.accent,
+      fontSize: 12,
+      fontFamily: fonts.sansBold,
+      textTransform: 'uppercase',
+      marginBottom: 6,
+    },
+    existingText: {
+      color: colors.textMuted,
+      fontSize: 15,
+      lineHeight: 22,
+      fontFamily: fonts.sans,
+    },
+    replyLabel: {
+      color: colors.text,
+      fontSize: 16,
+      fontFamily: fonts.sansSemiBold,
+      marginBottom: 10,
+    },
+    input: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.surfaceAlt,
+      borderRadius: 12,
+      color: colors.text,
+      fontSize: 16,
+      lineHeight: 22,
+      minHeight: 140,
+      padding: 14,
+      marginBottom: 16,
+      fontFamily: fonts.sans,
+    },
+    submit: {
+      backgroundColor: colors.accent,
+      borderRadius: 12,
+      paddingVertical: 16,
+      alignItems: 'center',
+    },
+    submitDisabled: {
+      opacity: 0.4,
+    },
+    submitPressed: {
+      opacity: 0.9,
+    },
+    submitText: {
+      color: colors.onAccent,
+      fontSize: 16,
+      fontFamily: fonts.sansBold,
+    },
+  };
+}

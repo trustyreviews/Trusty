@@ -14,7 +14,7 @@ import { FuturisticPatternBackdrop } from '../components/FuturisticPatternBackdr
 import { HeroCta } from '../components/HeroCta';
 import { LegalLinks } from '../components/LegalLinks';
 import { RestaurantHeroScene } from '../components/RestaurantHeroScene';
-import { useReviews } from '../context/ReviewsContext';
+import { useDemo } from '../context/DemoContext';
 
 const C = {
   ink: '#f7f8f5',
@@ -23,11 +23,13 @@ const C = {
   accent: '#2dd4bf',
 };
 
+const BEATS = ['Inbox', 'AI reply', 'Analytics'];
+
 /**
  * Connect — large auto Empty/Packed restaurant graphic + Trusty CTA.
  */
 export function OnboardingScreen({ navigation }) {
-  const { connectBusiness } = useReviews();
+  const { startDemo } = useDemo();
   const [scene, setScene] = useState('before');
   const enter = useSharedValue(0);
 
@@ -72,10 +74,22 @@ export function OnboardingScreen({ navigation }) {
             the house.
           </Text>
 
-          <HeroCta label="Try the demo" onPress={connectBusiness} />
+          <View style={styles.beats}>
+            <Text style={styles.beatsLabel}>What you’ll try</Text>
+            <View style={styles.beatsRow}>
+              {BEATS.map((beat, index) => (
+                <View key={beat} style={styles.beatItem}>
+                  {index > 0 ? <Text style={styles.beatArrow}>→</Text> : null}
+                  <Text style={styles.beatText}>{beat}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          <HeroCta label="Try the demo" onPress={startDemo} />
 
           <Text style={styles.hint}>
-            Demo mode — loads sample Riverside Coffee Co. data
+            2-minute walkthrough — sample Riverside Coffee Co. data
           </Text>
           <LegalLinks navigation={navigation} style={styles.legal} />
         </Animated.View>
@@ -134,8 +148,38 @@ const styles = StyleSheet.create({
     color: C.muted,
     fontSize: 14,
     lineHeight: 20,
-    marginBottom: 16,
+    marginBottom: 14,
     maxWidth: 440,
+  },
+  beats: {
+    marginBottom: 16,
+    gap: 6,
+  },
+  beatsLabel: {
+    color: C.dim,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+  },
+  beatsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+  },
+  beatItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  beatArrow: {
+    color: C.dim,
+    marginHorizontal: 8,
+    fontSize: 13,
+  },
+  beatText: {
+    color: C.ink,
+    fontSize: 13,
+    fontWeight: '600',
   },
   hint: {
     marginTop: 12,

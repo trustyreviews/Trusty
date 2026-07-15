@@ -62,6 +62,8 @@ export function ReviewRow({
   optimizeError,
   onSwipeWillOpen,
   onEditorFocus,
+  demoHighlight = false,
+  demoTourStep = null,
 }) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
@@ -70,6 +72,8 @@ export function ReviewRow({
   const swipeableRef = useRef(null);
   const navigation = useNavigation();
   const showShare = canShareReview(review) && !expanded;
+  const highlightAi = demoHighlight && demoTourStep === 'ai';
+  const highlightSend = demoHighlight && demoTourStep === 'send';
 
   const openReply = () => {
     swipeableRef.current?.close();
@@ -106,7 +110,13 @@ export function ReviewRow({
   );
 
   const row = (
-    <View style={[styles.row, flagged && styles.rowFlagged]}>
+    <View
+      style={[
+        styles.row,
+        flagged && styles.rowFlagged,
+        demoHighlight && styles.rowDemoHighlight,
+      ]}
+    >
       {flagged ? <View style={styles.accent} /> : null}
 
       {/* Meta column */}
@@ -179,6 +189,7 @@ export function ReviewRow({
                 <Pressable
                   style={({ pressed }) => [
                     styles.aiBtn,
+                    highlightAi && styles.aiBtnDemo,
                     (pressed || optimizing) && styles.pressedDim,
                   ]}
                   onPress={onOptimize}
@@ -213,6 +224,7 @@ export function ReviewRow({
                 <Pressable
                   style={({ pressed }) => [
                     styles.sendBtn,
+                    highlightSend && styles.sendBtnDemo,
                     !draft.trim() && styles.sendBtnDisabled,
                     pressed && draft.trim() && styles.sendBtnPressed,
                   ]}
@@ -298,6 +310,14 @@ function createStyles(colors, fonts) {
     },
     rowFlagged: {
       borderBottomColor: colors.hairline,
+    },
+    rowDemoHighlight: {
+      backgroundColor: colors.accentSoft,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: colors.accent,
+      marginBottom: 8,
+      paddingHorizontal: 10,
     },
     accent: {
       position: 'absolute',
@@ -490,6 +510,13 @@ function createStyles(colors, fonts) {
       gap: 7,
       paddingVertical: 6,
     },
+    aiBtnDemo: {
+      backgroundColor: colors.accentSoft,
+      borderRadius: 8,
+      paddingHorizontal: 8,
+      borderWidth: 1,
+      borderColor: colors.accent,
+    },
     aiText: {
       color: colors.textMuted,
       fontSize: 13,
@@ -523,6 +550,13 @@ function createStyles(colors, fonts) {
       paddingVertical: 10,
       paddingHorizontal: 16,
       borderRadius: 10,
+    },
+    sendBtnDemo: {
+      shadowColor: colors.accent,
+      shadowOpacity: 0.45,
+      shadowRadius: 10,
+      shadowOffset: { width: 0, height: 0 },
+      elevation: 4,
     },
     sendBtnDisabled: {
       opacity: 0.4,

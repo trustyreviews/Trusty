@@ -1,9 +1,9 @@
 import { useRef } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { StarRating } from './StarRating';
-import { colors, fonts } from '../theme';
+import { useThemedStyles } from '../hooks/useThemedStyles';
 
 const ACTION_WIDTH = 92;
 
@@ -22,6 +22,8 @@ function formatRelativeDate(iso) {
 // Subtle reveal: actions fade + settle in as the swipe progresses, rather than
 // snapping straight to full opacity — matches the calm, unhurried feel of the list.
 function SwipeAction({ progress, label, tone, onPress }) {
+  const styles = useThemedStyles(createStyles);
+
   const animatedStyle = useAnimatedStyle(() => {
     const p = Math.min(progress.value, 1);
     return {
@@ -48,6 +50,7 @@ function SwipeAction({ progress, label, tone, onPress }) {
 }
 
 export function ReviewCard({ review, onPress, onReply, onToggleRead, onSwipeWillOpen }) {
+  const styles = useThemedStyles(createStyles);
   // Single urgency signal: a quiet left-edge accent. No badges, no color-shifted
   // backgrounds, no colored text — everything else stays on the calm base palette.
   const isNegative = review.rating <= 2;
@@ -117,7 +120,7 @@ export function ReviewCard({ review, onPress, onReply, onToggleRead, onSwipeWill
           </Text>
 
           <Text style={[styles.status, review.replied && styles.statusReplied]}>
-            {review.replied ? 'Replied' : 'Tap to reply'}
+            {review.replied ? 'Replied' : 'Swipe to reply'}
           </Text>
         </Pressable>
       </Swipeable>
@@ -125,100 +128,102 @@ export function ReviewCard({ review, onPress, onReply, onToggleRead, onSwipeWill
   );
 }
 
-const styles = StyleSheet.create({
-  wrapper: {
-    marginBottom: 20,
-  },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: 16,
-    paddingVertical: 22,
-    paddingHorizontal: 22,
-  },
-  cardNegative: {
-    borderLeftWidth: 3,
-    borderLeftColor: colors.danger,
-  },
-  cardPressed: {
-    opacity: 0.85,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'baseline',
-    gap: 12,
-    marginBottom: 14,
-  },
-  authorRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    flex: 1,
-  },
-  author: {
-    color: colors.text,
-    fontSize: 17,
-    fontFamily: fonts.sansSemiBold,
-    flexShrink: 1,
-  },
-  unreadDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.unread,
-  },
-  date: {
-    color: colors.textDim,
-    fontSize: 13,
-    fontFamily: fonts.sans,
-  },
-  ratingRow: {
-    marginBottom: 14,
-  },
-  body: {
-    color: colors.textMuted,
-    fontSize: 15,
-    lineHeight: 23,
-    marginBottom: 18,
-    fontFamily: fonts.sans,
-  },
-  status: {
-    color: colors.textDim,
-    fontSize: 13,
-    fontFamily: fonts.sansMedium,
-  },
-  statusReplied: {
-    color: colors.accent,
-  },
-  actionPane: {
-    width: ACTION_WIDTH,
-    height: '100%',
-  },
-  actionAccent: {
-    backgroundColor: colors.accentSoft,
-    borderTopRightRadius: 16,
-    borderBottomRightRadius: 16,
-  },
-  actionNeutral: {
-    backgroundColor: colors.surfaceAlt,
-    borderTopLeftRadius: 16,
-    borderBottomLeftRadius: 16,
-  },
-  actionPressable: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  actionLabel: {
-    fontSize: 14,
-    fontFamily: fonts.sansSemiBold,
-    textAlign: 'center',
-    paddingHorizontal: 8,
-  },
-  actionLabelAccent: {
-    color: colors.accent,
-  },
-  actionLabelNeutral: {
-    color: colors.unread,
-  },
-});
+function createStyles(colors, fonts) {
+  return {
+    wrapper: {
+      marginBottom: 20,
+    },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: 16,
+      paddingVertical: 22,
+      paddingHorizontal: 22,
+    },
+    cardNegative: {
+      borderLeftWidth: 3,
+      borderLeftColor: colors.danger,
+    },
+    cardPressed: {
+      opacity: 0.85,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'baseline',
+      gap: 12,
+      marginBottom: 14,
+    },
+    authorRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      flex: 1,
+    },
+    author: {
+      color: colors.text,
+      fontSize: 17,
+      fontFamily: fonts.sansSemiBold,
+      flexShrink: 1,
+    },
+    unreadDot: {
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: colors.unread,
+    },
+    date: {
+      color: colors.textDim,
+      fontSize: 13,
+      fontFamily: fonts.sans,
+    },
+    ratingRow: {
+      marginBottom: 14,
+    },
+    body: {
+      color: colors.textMuted,
+      fontSize: 15,
+      lineHeight: 23,
+      marginBottom: 18,
+      fontFamily: fonts.sans,
+    },
+    status: {
+      color: colors.textDim,
+      fontSize: 13,
+      fontFamily: fonts.sansMedium,
+    },
+    statusReplied: {
+      color: colors.accent,
+    },
+    actionPane: {
+      width: ACTION_WIDTH,
+      height: '100%',
+    },
+    actionAccent: {
+      backgroundColor: colors.accentSoft,
+      borderTopRightRadius: 16,
+      borderBottomRightRadius: 16,
+    },
+    actionNeutral: {
+      backgroundColor: colors.surfaceAlt,
+      borderTopLeftRadius: 16,
+      borderBottomLeftRadius: 16,
+    },
+    actionPressable: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    actionLabel: {
+      fontSize: 14,
+      fontFamily: fonts.sansSemiBold,
+      textAlign: 'center',
+      paddingHorizontal: 8,
+    },
+    actionLabelAccent: {
+      color: colors.accent,
+    },
+    actionLabelNeutral: {
+      color: colors.unread,
+    },
+  };
+}
